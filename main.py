@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 import json
 import subprocess
 from datetime import datetime
@@ -32,6 +31,8 @@ def read_assets(asset_id: str):
 
         response['error'] = error_lines[0].replace('ERROR:', '').strip()
     else:
+        import pandas as pd
+
         df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "map", "results.csv"))
 
         subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "map", "results.csv")])
@@ -63,18 +64,18 @@ def read_assets(asset_id: str):
         with open(os.path.join(os.getenv('DATA_DIR'), 'assets', 'map', "success_lines.txt"), "w") as f:
             f.write(p1.stdout.decode('utf8'))
 
-        p2 = subprocess.run(['bash', os.path.join(os.getenv('HOME'), 'post_process_subprocess.sh'), os.path.join(os.getenv('DATA_DIR'), 'ironiq_whatif_inputs', "success_lines.txt")], capture_output=True)
+        p2 = subprocess.run(['bash', os.path.join(os.getenv('HOME'), 'post_process_subprocess.sh'), os.path.join(os.getenv('DATA_DIR'), 'assets', 'ironiq_whatif', "success_lines.txt")], capture_output=True)
 
         matches = p2.stdout.decode('utf-8').split('\n')
 
-        subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'map', "success_lines.txt")])
+        subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'ironiq_whatif', "success_lines.txt")])
 
         response['success'] = matches
 
     return response
 
 @app.get("/sysinfo/assets/{asset_id}/ironiq")
-def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
+def well_ironiq(asset_id: str, st_dt: str, et_dt: str):
     '''Get data between start_date and end_date'''
 
     p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "ironiq_getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
@@ -84,9 +85,9 @@ def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
 
     import pandas as pd
 
-    df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "map", "results1.csv"))
+    df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "ironiq_whatif", "results1.csv"))
 
-    subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'map', "results1.csv")])
+    subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'ironiq_whatif', "results1.csv")])
 
     return json.dumps(df.to_dict(orient='records'))
 
@@ -100,6 +101,10 @@ def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
     if p1.returncode > 0:
         return "No data found"
 
+    import pandas as pd
+
     df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "quorum_whatif", "results.csv"))
+
+    subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'quorum_whatif', "results.csv")])
 
     return json.dumps(df.to_dict(orient='records'))
