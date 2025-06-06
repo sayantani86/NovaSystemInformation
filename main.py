@@ -26,18 +26,15 @@ def read_assets(asset_id: str):
 
         p2 = subprocess.run(['grep', 'ERROR', os.path.join(os.getenv('DATA_DIR'), 'assets',"map",  "error_lines.txt")], capture_output=True)
         
-        subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "map", "error_lines.txt")], capture_output=True)
+        subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "map", "error_lines.txt")])
 
         error_lines = p2.stdout.decode('utf8').split('\n')
 
         response['error'] = error_lines[0].replace('ERROR:', '').strip()
     else:
-        resp = p1.stdout.decode('utf8').split('\n')
-
-        print(resp)
-        print()
-
         df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "map", "results.csv"))
+
+        subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "map", "results.csv")])
 
         response['success'] = json.dumps(df.to_dict(orient='records'))
 
@@ -80,7 +77,7 @@ def read_assets(asset_id: str):
 def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
     '''Get data between start_date and end_date'''
 
-    p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
+    p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "ironiq_getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
 
     if p1.returncode > 0:
         return "No data found"
@@ -88,6 +85,8 @@ def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
     import pandas as pd
 
     df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "map", "results1.csv"))
+
+    subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'map', "results1.csv")])
 
     return json.dumps(df.to_dict(orient='records'))
 
@@ -96,13 +95,11 @@ def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
 def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
     '''Get data between start_date and end_date'''
 
-    p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
+    p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "quorum_getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
 
     if p1.returncode > 0:
         return "No data found"
 
-    import pandas as pd
-
-    df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "map", "results1.csv"))
+    df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "quorum_whatif", "results.csv"))
 
     return json.dumps(df.to_dict(orient='records'))
