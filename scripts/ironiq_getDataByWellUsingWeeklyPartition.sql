@@ -6,7 +6,7 @@ $$
 DECLARE
 	r RECORD;
 	fnc_cmd text;
-	wellname_nowhitespace text := array_to_string(regexp_split_to_array(regexp_replace(regexp_replace(wellname, '#', ''), '-', ''), '\s+'), '');
+	wellname_nowhitespace text := regexp_replace(regexp_replace(regexp_replace(wellname, '#', ''), '-', ''), '\s+', '', 1, 0, 'i');
 BEGIN
 	RAISE NOTICE 'wellname = % and % and % and %', quote_literal(wellname), quote_literal(wellname_nowhitespace), quote_literal(st_dt), quote_literal(et_dt);
 	
@@ -15,7 +15,7 @@ BEGIN
 
 		RAISE NOTICE 'part_name = %', r.part_table_name; 
                
-		fnc_cmd := 'SELECT * FROM part_ironiq.' || quote_ident(r.part_table_name) || ' WHERE id::int IN (select item_id::int from iqranger_equipment_lookup WHERE array_to_string(regexp_split_to_array(regexp_replace(regexp_replace((regexp_match(equipment, ''(.*\dH).*''))[1], ''#'', ''''), ''-'', ''''), ''\s+''), '''') = ' || quote_literal(wellname_nowhitespace) || ') and timestamp::date >=' || quote_literal(st_dt) || ' and timestamp::date <=' || quote_literal(et_dt);
+		fnc_cmd := 'SELECT * FROM part_ironiq.' || quote_ident(r.part_table_name) || ' WHERE id::int IN (select item_id::int from iqranger_equipment_lookup WHERE regexp_replace(regexp_replace(regexp_replace((regexp_match(equipment, ''(.*\dH).*''))[1], ''#'', ''''), ''-'', ''''), ''\s+'', '''', 1, 0, ''i'') = ' || quote_literal(wellname_nowhitespace) || ') and timestamp::date >=' || quote_literal(st_dt) || ' and timestamp::date <=' || quote_literal(et_dt);
 
 		--RAISE NOTICE 'SQL = %', fnc_cmd;
 
