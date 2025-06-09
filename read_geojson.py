@@ -21,18 +21,26 @@ with open("meters.geojson") as f:
 with open("compressors.geojson") as f:
     gj_compressors = geojson.load(f)
 
+with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
+    with conn.cursor() as cur:
+        cur.execute("INSERT INTO maps.shapefiles(symbol, features) VALUES (%s, %s)",("Wells", json.dumps(gj['features'])))
+
+        cur.execute("INSERT INTO maps.shapefiles(symbol, features) VALUES (%s, %s)",("Area", json.dumps(gj_lease['features'])))
+
+        cur.execute("INSERT INTO maps.shapefiles(symbol, features) VALUES (%s, %s)",("Pipelines", json.dumps(gj_pipelines['features'])))
+
+        cur.execute("INSERT INTO maps.shapefiles(symbol, features) VALUES (%s, %s)",("METERS", json.dumps(gj_meters['features'])))
+
+        cur.execute("INSERT INTO maps.shapefiles(symbol, features) VALUES (%s, %s)",("COMPRESSORS", json.dumps(gj_compressors['features'])))
+
+        conn.commit()
+
+
 #with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
 #    with conn.cursor() as cur:
-#        cur.execute("INSERT INTO maps.shapefiles(name,geometry) VALUES (%s, %s)",("wells", json.dumps(gj['features'])))
+#        cur.execute("SELECT * FROM  maps.shapefiles")
 
-#        cur.execute("INSERT INTO maps.shapefiles(name,geometry) VALUES (%s, %s)",("bte_lease", json.dumps(gj_lease['features'])))
-
-#        cur.execute("INSERT INTO maps.shapefiles(name,geometry) VALUES (%s, %s)",("pipelines", json.dumps(gj_pipelines['features'])))
-
-#        cur.execute("INSERT INTO maps.shapefiles(name,geometry) VALUES (%s, %s)",("meters", json.dumps(gj_meters['features'])))
-
-#        cur.execute("INSERT INTO maps.shapefiles(name,geometry) VALUES (%s, %s)",("compressors", json.dumps(gj_compressors['features'])))
-
+#        rs = cur.fetchall()
 #        conn.commit()
 
 
