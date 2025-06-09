@@ -6,9 +6,17 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
+@app.get("/sysinfo/assets/maps")
+def map_data(asset_type: str | None):
+    import psycopg
+
+    with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
+        with conn.cursor() as cur:
+                cur.execute("SELECT * FROM maps.shapefiles")
+            rs = cur.fetchall()
+            conn.commit()
+
+    return json.dumps(rs)
 
 @app.get("/sysinfo/assets/{asset_id}")
 def read_assets(asset_id: str):
@@ -109,14 +117,3 @@ def read_assets_ironiq(asset_id: str, st_dt: str, et_dt: str):
 
     return json.dumps(df.to_dict(orient='records'))
 
-@app.get("/sysinfo/maps")
-def map_data():
-    import psycopg
-
-    with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT * FROM  maps.shapefiles")
-            rs = cur.fetchall()
-            conn.commit()
-    
-    return json.dumps(rs)
