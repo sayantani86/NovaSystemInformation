@@ -6,15 +6,19 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+@app.get("/sysinfo")
+def test_params():
+    return []
+
 @app.get("/sysinfo/assets/maps")
-def map_data(asset_type: str | None):
+def map_data():
     import psycopg
 
     with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
         with conn.cursor() as cur:
                 cur.execute("SELECT * FROM maps.shapefiles")
-            rs = cur.fetchall()
-            conn.commit()
+                rs = cur.fetchall()
+                conn.commit()
 
     return json.dumps(rs)
 
