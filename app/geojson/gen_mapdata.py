@@ -14,8 +14,27 @@ t1 = time.time()
 #       WELLS
 #---------------------------------
 
-df = pd.read_csv(os.path.join(os.getenv('DATA_DIR'), 'Files', 'Baytex_Wells.csv'))
+with psycopg.connect("dbname=novadb user=dba_access password=avon123", row_factory=dict_row) as conn:
+    with conn.cursor() as cur:
+        cur.execute("SELECT description, \"Well Name\", geometry, longitude::float, latitude::float FROM maps.wells_merged_by_name")
+
+        rs = cur.fetchall()
+        conn.commit()
+
+df = pd.DataFrame(rs)
+
+df1 = df.loc[df['geometry'].isnull() & df['longitude'].notnull()]
+
+df1['geometry'] = gpd.GeoSeries(gpd.points_from_xy(df1['longitude'], df1['latitude']), crs=4326)
+
 df['geometry'] = df['geometry'].apply(lambda x: shapely.wkt.loads(x))
+
+df.loc[df['geometry'].isnull() & df['longitude'].notnull(), 'geometry'] = df1['geometry']
+
+df.drop(columns=["Well Name"], inplace=True)
+
+df.rename(columns={'description': 'Well Name'}, inplace=True)
+
 df["Status"] = "Healthy"
 
 # EPSG:2236 corordinates are in feet
@@ -23,7 +42,7 @@ df["Status"] = "Healthy"
 #geometry = geometry.to_crs("EPSG:4326")
 
 gdf = gpd.GeoDataFrame(df, geometry=df['geometry'], crs="EPSG:4326")
-gdf = gdf.set_index('Well name')
+gdf = gdf.set_index('Well Name')
 
 #gdf["centroid"] = gdf.centroid
 #first_point = gdf["centroid"].iloc[0]
@@ -34,23 +53,23 @@ gdf = gdf.set_index('Well name')
 #gdf = gdf.set_geometry(geometry)
 
 gdf['Symbol'] = "Wells"
-gdf[['geometry', 'Symbol']].to_file('wells.geojson', driver='GeoJSON')
+gdf[['geometry', 'Symbol', 'Status']].to_file('wells.geojson', driver='GeoJSON')
 
 #--------------------------------
 #          LEASE
 #---------------------------------
-gdf_leaseOp = gpd.read_file(os.getenv('GEOM_DIR') + '/BTE_OP_Leasehold_010825.shp', columns=['Comments', 'geometry'])
+gdf_leaseOp = gpd.read_file(os.getenv('GEOM_DIR') + '/BTE_OP_Leasehold_010825.shp', columns=['geometry'])
 gdf_leaseOp = gdf_leaseOp.set_geometry("geometry")
 gdf_leaseOp = gdf_leaseOp.to_crs("EPSG:4326")
 gdf_leaseOp['Symbol'] = "Area"
 
 # EPSG:32040
-gdf_leaseNonOp = gpd.read_file(os.getenv('GEOM_DIR') + '/BTE_NonOp_Leasehold_010825.shp', columns=['Comments', 'geometry'])
-gdf_leaseNonOp = gdf_leaseNonOp.set_geometry("geometry")
-gdf_leaseNonOp = gdf_leaseNonOp.to_crs("EPSG:4326")
-gdf_leaseNonOp['Symbol'] = "Area"
+#gdf_leaseNonOp = gpd.read_file(os.getenv('GEOM_DIR') + '/BTE_NonOp_Leasehold_010825.shp', columns=['Comments', 'geometry'])
+#gdf_leaseNonOp = gdf_leaseNonOp.set_geometry("geometry")
+#gdf_leaseNonOp = gdf_leaseNonOp.to_crs("EPSG:4326")
+#gdf_leaseNonOp['Symbol'] = "Area"
 
-pd.concat([gdf_leaseOp, gdf_leaseNonOp]).to_file('lease.geojson', driver='GeoJSON')
+pd.concat([gdf_leaseOp]).to_file('lease.geojson', driver='GeoJSON')
 
 #-------------------------------------
 #         PIPELINES
@@ -75,7 +94,11 @@ for shp_file in stdout.decode('utf-8').split('\n'):
 
     gdf_pipeline = pd.concat([gdf_pipeline, df1])
 
+
 gdf_pipeline = gdf_pipeline[gdf_pipeline['OWNER'] != 'IRONWOOD']
+gdf_pipeline = gdf_pipeline[gdf_pipeline['SYS_NM'].notnull()]
+gdf_pipeline = gdf_pipeline[gdf_pipeline['SUBSYS_NM'].notnull()]
+
 gdf_pipeline['Symbol'] = 'Pipelines'
 gdf_pipeline.to_file('pipelines.geojson', driver='GeoJSON')
 
@@ -85,11 +108,11 @@ gdf_pipeline.to_file('pipelines.geojson', driver='GeoJSON')
 
 metersDF = pd.read_excel(os.path.join(os.getenv('DATA_DIR'), 'Files', 'ETC_Meters.xlsx'))
 gdf_meters = gpd.GeoDataFrame(metersDF, geometry=gpd.points_from_xy(metersDF['LONG'], metersDF['LAT']), crs="EPSG:4326")
+gdf_meters['Symbol'] = "Meters"
 
-gdf_meters['centroid'] = gdf_meters.geometry.to_crs(3857).centroid
-gdf_meters["distance"] = gdf_meters["centroid"].distance(gdf_meters['centroid'].iloc[0])
-gdf_meters[['Name', 'Symbol', 'geometry', 'distance']].to_file('meters.geojson', driver='GeoJSON')
-
+#gdf_meters['centroid'] = gdf_meters.geometry.to_crs(3857).centroid
+#gdf_meters["distance"] = gdf_meters["centroid"].distance(gdf_meters['centroid'].iloc[0])
+gdf_meters[['Name', 'Symbol', 'geometry']].to_file('meters.geojson', driver='GeoJSON')
 
 # -------------------------------
 #          COMPRESSORS
@@ -97,8 +120,10 @@ gdf_meters[['Name', 'Symbol', 'geometry', 'distance']].to_file('meters.geojson',
 
 compressorsDF = pd.read_excel(os.path.join(os.getenv('DATA_DIR'), 'Files', 'Lavaca_Compressors.xlsx'))
 gdf_compressors = gpd.GeoDataFrame(compressorsDF, geometry=gpd.points_from_xy(compressorsDF['LONG'], compressorsDF['LAT']), crs="EPSG:4326")
-gdf_compressors['centroid'] = gdf_compressors.geometry.to_crs(3857).centroid
-gdf_compressors["distance"] = gdf_compressors["centroid"].distance(gdf_compressors['centroid'].iloc[0])
+gdf_compressors['Symbol'] = "Compressors"
 
-gdf_compressors[['Name', 'Symbol', 'geometry', 'distance']].to_file('compressors.geojson', driver='GeoJSON')
+#gdf_compressors['centroid'] = gdf_compressors.geometry.to_crs(3857).centroid
+#gdf_compressors["distance"] = gdf_compressors["centroid"].distance(gdf_compressors['centroid'].iloc[0])
+
+gdf_compressors[['Name', 'Symbol', 'geometry']].to_file('compressors.geojson', driver='GeoJSON')
 
