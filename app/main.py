@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 from datetime import datetime
+from psycopg.rows import dict_row
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -10,17 +11,46 @@ app = FastAPI()
 def test_params():
     return []
 
+@app.get("/sysinfo/assets/geojson")
+def get_geo_data():
+    import geojson
+
+    with open(os.path.join(os.getenv('HOME'), "wells.geojson")) as f:
+        gj = geojson.load(f)
+
+    with open(os.path.join(os.getenv('HOME'), "lease.geojson")) as f:
+        gj_lease = geojson.load(f)
+
+    with open(os.path.join(os.getenv('HOME'), "pipelines.geojson")) as f:
+        gj_pipelines = geojson.load(f)
+
+    with open(os.path.join(os.getenv('HOME'), "meters.geojson")) as f:
+        gj_meters = geojson.load(f)
+
+    with open(os.path.join(os.getenv('HOME'), "compressors.geojson")) as f:
+        gj_compressors = geojson.load(f)
+
+    features = []
+
+    features.extend(gj['features'])
+    features.extend(gj_lease['features'])
+    features.extend(gj_pipelines['features'])
+    features.extend(gj_meters['features'])
+    features.extend(gj_compressors['features'])
+    
+    return features
+
 @app.get("/sysinfo/assets/maps")
 def map_data():
     import psycopg
 
-    with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
+    with psycopg.connect("dbname=novadb user=dba_access password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
-                cur.execute("SELECT * FROM maps.shapefiles")
+                cur.execute("SELECT features FROM maps.shapefiles")
                 rs = cur.fetchall()
                 conn.commit()
 
-    return json.dumps(rs)
+    return rs
 
 @app.get("/sysinfo/assets/{asset_id}")
 def read_assets(asset_id: str):

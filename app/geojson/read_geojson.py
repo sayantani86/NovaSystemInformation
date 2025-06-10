@@ -21,6 +21,7 @@ with open("meters.geojson") as f:
 with open("compressors.geojson") as f:
     gj_compressors = geojson.load(f)
 
+
 with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
     with conn.cursor() as cur:
         cur.execute("INSERT INTO maps.shapefiles(symbol, features) VALUES (%s, %s)",("Wells", json.dumps(gj['features'])))

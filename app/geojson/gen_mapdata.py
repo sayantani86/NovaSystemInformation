@@ -15,24 +15,26 @@ t1 = time.time()
 #---------------------------------
 
 df = pd.read_csv(os.path.join(os.getenv('DATA_DIR'), 'Files', 'Baytex_Wells.csv'))
-
-#df['geometry'] = df['geometry'].apply(lambda x: shapely.wkt.loads(x))
+df['geometry'] = df['geometry'].apply(lambda x: shapely.wkt.loads(x))
+df["Status"] = "Healthy"
 
 # EPSG:2236 corordinates are in feet
-geometry = gpd.GeoSeries(gpd.points_from_xy(df['SHL X'], df['SHL Y']), crs=2236)
-gdf = gpd.GeoDataFrame(df, geometry=geometry)
+#geometry = gpd.GeoSeries(gpd.points_from_xy(df['SHL X'], df['SHL Y']), crs=2236)
+#geometry = geometry.to_crs("EPSG:4326")
+
+gdf = gpd.GeoDataFrame(df, geometry=df['geometry'], crs="EPSG:4326")
 gdf = gdf.set_index('Well name')
 
-gdf["centroid"] = gdf.centroid
-first_point = gdf["centroid"].iloc[0]
-gdf["distance"] = gdf["centroid"].distance(first_point)
+#gdf["centroid"] = gdf.centroid
+#first_point = gdf["centroid"].iloc[0]
+#gdf["distance"] = gdf["centroid"].distance(first_point)
 
 # Convert to crs 4326
-geometry = geometry.to_crs("EPSG:4326")
-gdf = gdf.set_geometry(geometry)
-gdf['Symbol'] = "Wells"
+#geometry = geometry.to_crs("EPSG:4326")
+#gdf = gdf.set_geometry(geometry)
 
-gdf[['County (SHL)', 'geometry', 'distance', 'Symbol']].to_file('wells.geojson', driver='GeoJSON')
+gdf['Symbol'] = "Wells"
+gdf[['geometry', 'Symbol']].to_file('wells.geojson', driver='GeoJSON')
 
 #--------------------------------
 #          LEASE
@@ -86,7 +88,6 @@ gdf_meters = gpd.GeoDataFrame(metersDF, geometry=gpd.points_from_xy(metersDF['LO
 
 gdf_meters['centroid'] = gdf_meters.geometry.to_crs(3857).centroid
 gdf_meters["distance"] = gdf_meters["centroid"].distance(gdf_meters['centroid'].iloc[0])
-
 gdf_meters[['Name', 'Symbol', 'geometry', 'distance']].to_file('meters.geojson', driver='GeoJSON')
 
 
