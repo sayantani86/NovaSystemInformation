@@ -7,6 +7,16 @@ from typing import Annotated
 from .routers import assets
 
 app = FastAPI()
+
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or specify ["http://localhost:8000"] for stricter config
+    allow_credentials=True,
+    allow_methods=["*"],  # or specify ["POST", "GET"]
+    allow_headers=["*"],
+)
+
 app.include_router(
         assets.router,
         prefix="/sysinfo"
@@ -15,33 +25,6 @@ app.include_router(
 @app.get("/sysinfo")
 def test_params():
     return []
-
-@app.get("/sysinfo/assets/{asset_id}")
-def read_assets(asset_id: str):
-    '''Get details of an asset type'''
-
-    p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "getWellDetails.sh"), "dba_access", "novadb", asset_id], capture_output=True)
-
-    if p1.returncode > 0:
-        # Error block
-        with open(os.path.join(os.getenv('DATA_DIR'), 'assets', "map", "error_lines.txt"), "w") as f:
-            f.write(p1.stderr.decode('utf8'))
-
-        p2 = subprocess.run(['grep', 'ERROR', os.path.join(os.getenv('DATA_DIR'), 'assets',"map",  "error_lines.txt")], capture_output=True)
-        
-        subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "map", "error_lines.txt")])
-
-        error_lines = p2.stdout.decode('utf8').split('\n')
-
-        raise HTTPException(status_code=400, detail=error_lines[0].replace('ERROR:', '').strip())
-        
-    import pandas as pd
-
-    df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "map", "results.csv"))
-
-    subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "map", "results.csv")])
-
-    return df.to_dict(orient='records')
 
 @app.get("/sysinfo/assets/{asset_id}/ironiq_well_names")
 def read_assets(asset_id: str):
