@@ -44,7 +44,7 @@ def map_data():
     import psycopg
     from psycopg.rows import dict_row
 
-    with psycopg.connect("dbname=novadb user=dba_access password=avon123") as conn:
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123") as conn:
         with conn.cursor() as cur:
                 cur.execute("SELECT features FROM maps.shapefiles")
                 rs = cur.fetchall()
@@ -61,7 +61,7 @@ def map_data(asset_type: str):
     import psycopg
     from psycopg.rows import dict_row
 
-    with psycopg.connect("dbname=novadb user=dba_access password=avon123", row_factory=dict_row) as conn:
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
                 cur.execute("SELECT features FROM maps.shapefiles WHERE symbol ILIKE %s", (asset_type,))
                 rs = cur.fetchall()
