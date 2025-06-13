@@ -1,0 +1,29 @@
+name: Deploy System Info API
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release
+
+jobs:
+  deploy:
+    name: Deploy to EC2 Private
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up SSH key
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
+        chmod 600 ec2_key.pem
+
+    - name: SSH into EC2 and deploy container
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no nova_system_information
+          cd system_api
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+          docker stop nova_system_api || true
+          docker rm nova_system_api || true
+          docker pull ghcr.io/${{ github.repository_owner }}/nova_system_api:latest
+          docker run -d -p 8000:8000 --name nova_system_api --mount type=bind,src=/home/ec2-user/,dst=/system_api --env-file ./.env ghcr.io/ayata/nova_system_api:latest
+        EOF

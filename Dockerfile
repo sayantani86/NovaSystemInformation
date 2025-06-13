@@ -1,4 +1,3 @@
-# Use an official Python base image
 FROM python
 
 # Set environment variables
