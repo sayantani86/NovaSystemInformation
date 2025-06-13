@@ -26,5 +26,5 @@ jobs:
           docker rm nova_system_api || true
           docker system prune -a --volumes -f
           docker pull ghcr.io/${{ github.repository_owner }}/nova_system_api:latest
-          docker run -p 8000:8000 --name novasystem --mount type=bind,src=/home/ec2-user/,dst=/system_api --env-file ./.env ghcr.io/ayata/nova_system_api:latest
+          docker run -d -p 8000:8000 --name nova_system_api --mount type=bind,src=/home/ec2-user/,dst=/system_api --env-file ./.env ghcr.io/ayata/nova_system_api:latest
         EOF
