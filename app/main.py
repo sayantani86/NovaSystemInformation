@@ -4,7 +4,8 @@ import subprocess
 from datetime import datetime
 from fastapi import FastAPI, Query, HTTPException
 from typing import Annotated
-from .routers import assets
+from .routers import maps
+from .routers import wells
 
 app = FastAPI()
 
@@ -18,13 +19,14 @@ app.add_middleware(
 )
 
 app.include_router(
-        assets.router,
-        prefix="/sysinfo"
+    maps.router,
+    prefix="/sysinfo/assets"
 )
 
-@app.get("/sysinfo")
-def test_params():
-    return []
+app.include_router(
+    wells.router,
+    prefix="/sysinfo/assets"
+)
 
 @app.get("/sysinfo/assets/{asset_id}/ironiq_well_names")
 def read_assets(asset_id: str):
@@ -76,21 +78,4 @@ def well_ironiq(asset_id: str, st_dt: str, et_dt: str):
 
     return json.dumps(df.to_dict(orient='records'))
 
-
-@app.get("/sysinfo/assets/{asset_id}/quorum")
-def read_assets_ironiq(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
-    '''Get data between start_date and end_date'''
-
-    p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "quorum_getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
-
-    if p1.returncode > 0:
-        return "No data found"
-
-    import pandas as pd
-
-    df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "quorum_whatif", "results.csv"))
-
-    subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'quorum_whatif', "results.csv")])
-
-    return json.dumps(df.to_dict(orient='records'))
 
