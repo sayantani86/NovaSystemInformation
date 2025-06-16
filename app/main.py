@@ -2,13 +2,14 @@ import os
 import json
 import subprocess
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-
-from .routers import assets, wells
+from fastapi import FastAPI, Query, HTTPException
+from typing import Annotated
+from .routers import maps
+from .routers import wells
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # or specify ["http://localhost:8000"] for stricter config
@@ -18,18 +19,14 @@ app.add_middleware(
 )
 
 app.include_router(
-        assets.router,
-        prefix="/sysinfo"
+    maps.router,
+    prefix="/sysinfo/assets"
 )
 
 app.include_router(
-        wells.router,
-        prefix="/sysinfo/assets"
+    wells.router,
+    prefix="/sysinfo/assets"
 )
-
-@app.get("/sysinfo")
-def test_params():
-    return []
 
 @app.get("/sysinfo/assets/{asset_id}/ironiq_well_names")
 def read_assets(asset_id: str):
@@ -80,4 +77,5 @@ def well_ironiq(asset_id: str, st_dt: str, et_dt: str):
     subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', 'ironiq_whatif', "results1.csv")])
 
     return json.dumps(df.to_dict(orient='records'))
+
 

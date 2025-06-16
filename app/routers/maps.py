@@ -1,8 +1,9 @@
 import os
+import subprocess
 from fastapi import APIRouter, HTTPException
 
 router = APIRouter(
-    prefix="/assets",
+    prefix="/maps",
 )
 
 @router.get("/geojson")
