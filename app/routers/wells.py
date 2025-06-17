@@ -10,6 +10,7 @@ router = APIRouter(
     prefix="/wells",
 )
 
+"""
 @router.get("/{asset_id}")
 def read_assets(asset_id: str):
     '''Get details of an asset type'''
@@ -34,6 +35,22 @@ def read_assets(asset_id: str):
     subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "wells", "results.csv")])
 
     return df.to_dict(orient='records')
+"""
+
+@router.get("/{asset_id}")
+def read_assets(asset_id: str):
+    '''Get details of an asset type'''
+    
+    import psycopg
+    from psycopg.rows import dict_row
+
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123") as conn:
+        with conn.cursor() as cur:
+                cur.execute(f"SELECT * FROM getWellDetails('{asset_id}')")
+                rs = cur.fetchall()
+                conn.commit()
+
+    return rs
 
 @router.get("/{asset_id}/quorum")
 def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
