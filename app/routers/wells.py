@@ -66,6 +66,22 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
 
     return df.to_dict(orient='records')
 
+@router.get("/{asset_id}/production_data")
+def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
+
+    import psycopg
+    from psycopg.rows import dict_row
+
+    asset_id_sub = asset_id.replace('.01', '01')
+
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
+        with conn.cursor() as cur:
+                cur.execute(f"SELECT * FROM getRangedDataFromQuorumByWell('{asset_id}', asset_id_sub, '{st_dt}', '{et_dt')")
+                rs = cur.fetchall()
+                conn.commit()
+
+    return rs
+
 @router.post("/")
 def getWells(item: WhatIfRequest):
    
