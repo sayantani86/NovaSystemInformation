@@ -42,7 +42,7 @@ def read_assets(asset_id: str):
     import psycopg
     from psycopg.rows import dict_row
 
-    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123") as conn:
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
                 cur.execute(f"SELECT * FROM getWellDetails('{asset_id}')")
                 rs = cur.fetchall()
