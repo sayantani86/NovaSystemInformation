@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import subprocess
+import psycopg
+from psycopg.rows import dict_row
 from typing import Annotated
 from fastapi import APIRouter, Query,  HTTPException
 
@@ -39,9 +41,6 @@ def read_assets(asset_id: str):
 def read_assets(asset_id: str):
     '''Get details of an asset type'''
     
-    import psycopg
-    from psycopg.rows import dict_row
-
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
                 cur.execute(f"SELECT * FROM getWellDetails('{asset_id}')")
@@ -55,8 +54,6 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
     '''Get data between start_date and end_date'''
 
     p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "quorum_getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
-    print(p1)
-
     if p1.returncode > 0:
         return p1.stderr
 
@@ -69,10 +66,9 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
 @router.get("/{asset_id}/production_data")
 def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
 
-    import psycopg
-    from psycopg.rows import dict_row
-
     asset_id_sub = asset_id.replace('.01', '01')
+
+    print(f"SELECT * FROM getRangedDataFromQuorumByWell('{asset_id}', {asset_id_sub}, '{st_dt}', '{et_dt}')")
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
@@ -99,23 +95,23 @@ def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10
         'q_sequential_month': 'sequential_month'
     }, inplace=True)
 
-    df.to_csv("/home/ec2-user/training_inputs.csv", index=False)
 
     return df.to_dict(orient='records')
 
 @router.post("/")
 def getWells(item: WhatIfRequest):
-   
-    actionableInputs = list(zip(item.productionWellList, [item.startDate]*len(item.productionWellList), [item.endDate]*len(item.productionWellList), [item.actionableParameters.choke] * len(item.productionWellList)))
+    actionableInputs = tuple(zip(item.productionWellList, [item.startDate]*len(item.productionWellList), [item.endDate]*len(item.productionWellList)))
 
     print(actionableInputs)
+    
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
+        with conn.cursor() as cur:
+                cur.execute("DROP TABLE IF EXISTS quorum_whatif.whatif_inputs;")
 
-    import psycopg
+                cur.execute("CREATE TABLE quorum_whatif.whatif_inputs(refid float, start_date varchar, end_date varchar);")
 
-    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123") as conn:
-         with conn.cursor() as cur:
-             cur.execute(f"CREATE TABLE quorum_whatif.whatif_inputs(refid float, start_date varchar, end_date varchar, choke float)")
-             cur.execute("INSERT INTO quorum_whatif.whatif_inputs values (%s, %s, %s, %s) ", actionableInputs)
-             conn.commit()
+                cur.execute(f"INSERT INTO quorum_whatif.whatif_inputs(refid, start_date, end_date) values (%s, %s, %s)", actionableInputs)
 
-    return item
+                conn.commit()
+
+    return actionableInputs
