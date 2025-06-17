@@ -80,7 +80,28 @@ def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10
                 rs = cur.fetchall()
                 conn.commit()
 
-    return rs
+    df = pd.DataFrame(rs)
+
+    df.rename(columns= {
+        'q_wellname': 'wellname',
+        'q_entry_date': 'Entry_Date',
+        'q_flowingtubingpressure': 'FlowingTubingPressure',
+        'q_casingpressure': 'casingpressure',
+        'q_linepressure': 'LinePressure',
+        'q_allocatedgasinjectionvolume': 'AllocatedGasInjectionVolume',
+        'q_choke': 'Choke',
+        'q_allocatedproductionoilvolume': 'AllocatedProductionOilVolume',
+        'q_gasliftgasmeasuredvolume': 'GasLiftGasMeasuredVolume',
+        'q_gaslift_flag': 'gaslift_flag',
+        'q_rampup_flag': 'rampup_flag',
+        'q_shutin_flag1': 'shutin_flag1',
+        'q_shutin_flag2': 'shutin_flag2',
+        'q_sequential_month': 'sequential_month'
+    }, inplace=True)
+
+    df.to_csv("/home/ec2-user/training_inputs.csv", index=False)
+
+    return df.to_dict(orient='records')
 
 @router.post("/")
 def getWells(item: WhatIfRequest):
