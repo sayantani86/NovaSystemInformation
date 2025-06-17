@@ -10,8 +10,7 @@ router = APIRouter(
     prefix="/wells",
 )
 
-"""
-@router.get("/{asset_id}")
+@router.get("/{asset_id}i/v1")
 def read_assets(asset_id: str):
     '''Get details of an asset type'''
 
@@ -35,7 +34,6 @@ def read_assets(asset_id: str):
     subprocess.run(['rm', os.path.join(os.getenv('DATA_DIR'), 'assets', "wells", "results.csv")])
 
     return df.to_dict(orient='records')
-"""
 
 @router.get("/{asset_id}")
 def read_assets(asset_id: str):
@@ -69,4 +67,17 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
 
 @router.post("/")
 def getWells(item: WhatIfRequest):
+   
+    actionableInputs = list(zip(item.productionWellList, [item.startDate]*len(item.productionWellList), [item.endDate]*len(item.productionWellList), [item.actionableParameters.choke] * len(item.productionWellList)))
+
+    print(actionableInputs)
+
+    import psycopg
+
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123") as conn:
+         with conn.cursor() as cur:
+             cur.execute(f"CREATE TABLE quorum_whatif.whatif_inputs(refid float, start_date varchar, end_date varchar, choke float)")
+             cur.execute("INSERT INTO quorum_whatif.whatif_inputs values (%s, %s, %s, %s) ", actionableInputs)
+             conn.commit()
+
     return item
