@@ -55,9 +55,10 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
     '''Get data between start_date and end_date'''
 
     p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "quorum_getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
+    print(p1)
 
     if p1.returncode > 0:
-        return "No data found"
+        return p1.stderr
 
     df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), "assets", "quorum_whatif", "results.csv"))
     
