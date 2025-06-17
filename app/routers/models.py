@@ -6,4 +6,6 @@ class ActionableParametersForWellGroup(BaseModel):
 class WhatIfRequest(BaseModel):
     actionableParameters: ActionableParametersForWellGroup
     productionWellList: list[float]
+    startDate: str
+    endDate: str
 
