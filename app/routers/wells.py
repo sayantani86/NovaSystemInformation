@@ -43,9 +43,27 @@ def read_assets(asset_id: str):
     
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
-                cur.execute(f"SELECT * FROM getWellDetails('{asset_id}')")
+                cur.execute(f"""SELECT 
+                                w_description as "Well Name", 
+                                w_county as "County",
+                                w_state as "State",
+                                w_pv_wc_id as "RefID",
+                                w_mth_1st_activity as "First activity month",
+                                quorum_firstproductiondate as "First production date",
+                                shlx as "SHL X",
+                                shly as "SHL Y",
+                                w_longitude as "Longitude",
+                                w_latitude as "Latitude",
+                                w_foreman as "Foreman",
+                                w_gl1 as "Gas Lift 2",
+                                w_gl1_range as "Gas Lift 2 period",
+                                w_gl2 as "Gas Lift 1",
+                                w_gl2_range as "Gas Lift 1 period"
+                FROM getWellDetails('{asset_id}')""")
+
                 rs = cur.fetchall()
                 conn.commit()
+
 
     return rs
 
@@ -110,8 +128,11 @@ def getWells(item: WhatIfRequest):
 
                 cur.execute("CREATE TABLE quorum_whatif.whatif_inputs(refid float, start_date varchar, end_date varchar);")
 
-                cur.execute(f"INSERT INTO quorum_whatif.whatif_inputs(refid, start_date, end_date) values (%s, %s, %s)", actionableInputs)
+                cur.executemany(f"INSERT INTO quorum_whatif.whatif_inputs(refid, start_date, end_date) values (%s, %s, %s)", actionableInputs)
 
+                cur.execute(f"SELECT * FROM getWhatIfInputsForGroupedWells();")
+
+                rs = cur.fetchall()
                 conn.commit()
 
-    return actionableInputs
+    return rs
