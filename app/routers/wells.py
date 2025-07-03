@@ -4,7 +4,7 @@ import subprocess
 import psycopg
 from psycopg.rows import dict_row
 from typing import Annotated
-from fastapi import APIRouter, Query,  HTTPException
+from fastapi import APIRouter, Query, HTTPException
 
 from .models import *
 
@@ -51,6 +51,7 @@ async def read_assets(asset_id: str):
     
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
+            try:
                 cur.execute(f"""SELECT 
                                 w_description as "Well Name", 
                                 w_county as "County",
@@ -71,6 +72,10 @@ async def read_assets(asset_id: str):
 
                 rs = cur.fetchall()
                 conn.commit()
+            except:
+                raise HTTPException(
+                    status_code=500, detail="The server has encountered an error"
+                )
     return rs
 
 @router.get("/{asset_id}/quorum")
@@ -125,7 +130,6 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
         'q_sequential_month': 'sequential_month'
     }, inplace=True)
 
-
     return df.to_dict(orient='records')
 
 @router.post("/")
@@ -148,6 +152,7 @@ async def getWells(item: WhatIfRequest):
                 cur.execute(f"SELECT * FROM getWhatIfInputsForGroupedWells();")
 
                 rs = cur.fetchall()
+                
                 conn.commit()
 
     return rs
