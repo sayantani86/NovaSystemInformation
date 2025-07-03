@@ -40,7 +40,7 @@ def get_geo_data():
     return features
 
 @router.get("/")
-def map_data():
+async def map_data():
     import psycopg
     from psycopg.rows import dict_row
 
@@ -57,7 +57,7 @@ def map_data():
     return resp
 
 @router.get("/{asset_type}")
-def map_data(asset_type: str):
+async def map_data(asset_type: str):
     import psycopg
     from psycopg.rows import dict_row
 
