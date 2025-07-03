@@ -4,7 +4,7 @@ class ActionableParametersForWellGroup(BaseModel):
     choke: float
 
 class WhatIfRequest(BaseModel):
-    productionWellList: list[float]
+    productionWellList: list[float] = []
     startDate: str
     endDate: str
 
