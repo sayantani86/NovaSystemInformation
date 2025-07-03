@@ -14,7 +14,12 @@ router = APIRouter(
 
 @router.get("/{asset_id}i/v1")
 def read_assets(asset_id: str):
-    '''Get details of an asset type'''
+    """Retrieves the details of a well.All information are from Quorum database and is not dependent on time
+
+    This is the version which uses shell script to execute the given query.Can be run when psql is installed on source server.
+
+    asset_id: Unique identifier of the asset
+    """
 
     p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "getWellDetails.sh"), "dba_access", "novadb", asset_id], capture_output=True)
 
@@ -38,8 +43,11 @@ def read_assets(asset_id: str):
     return df.to_dict(orient='records')
 
 @router.get("/{asset_id}")
-def read_assets(asset_id: str):
-    '''Get details of an asset type'''
+async def read_assets(asset_id: str):
+    """Retrieves the details of a well.All information are from Quorum database and is not dependent on time
+
+    asset_id: Unique identifier of the asset
+    """
     
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
@@ -63,8 +71,6 @@ def read_assets(asset_id: str):
 
                 rs = cur.fetchall()
                 conn.commit()
-
-
     return rs
 
 @router.get("/{asset_id}/quorum")
@@ -82,7 +88,13 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
     return df.to_dict(orient='records')
 
 @router.get("/{asset_id}/production_data")
-def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
+async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
+    """Retrieves the production variables recorded in quorum database for a well
+
+    asset_id: Unique identifier of the asset
+    st_dt: Start date of the range
+    et_dt: End date of the range
+    """
 
     asset_id_sub = asset_id.replace('.01', '01')
 
@@ -117,11 +129,14 @@ def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10
     return df.to_dict(orient='records')
 
 @router.post("/")
-def getWells(item: WhatIfRequest):
+async def getWells(item: WhatIfRequest):
+    """Retrieves the production variables recorded in Quorum database for a group of wells
+
+    item: An object of a list of RefId and a date range for the group
+    """
+
     actionableInputs = tuple(zip(item.productionWellList, [item.startDate]*len(item.productionWellList), [item.endDate]*len(item.productionWellList)))
 
-    print(actionableInputs)
-    
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
                 cur.execute("DROP TABLE IF EXISTS quorum_whatif.whatif_inputs;")
@@ -135,4 +150,19 @@ def getWells(item: WhatIfRequest):
                 rs = cur.fetchall()
                 conn.commit()
 
+    return rs
+
+@router.get("/{asset_id}/nearby_components_within_two_miles/{asset_type}")
+async def get_components_within_two_miles(asset_id: str, asset_type: str):
+    """Get nearby components within 2 miles radius of a well.The results are precomputed and loaded when queried
+
+    asset_id: Unique identifier of the asset
+    """
+    
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
+        with conn.cursor() as cur:
+                cur.execute(f"""SELECT * FROM fetchNearbyComponents({asset_id}, '{asset_type}');""")
+
+                rs = cur.fetchall()
+                conn.commit()
     return rs
