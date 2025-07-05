@@ -12,7 +12,7 @@ router = APIRouter(
     prefix="/wells",
 )
 
-@router.get("/{asset_id}i/v1")
+@router.get("/{asset_id}/v1")
 def read_assets(asset_id: str):
     """Retrieves the details of a well.All information are from Quorum database and is not dependent on time
 
@@ -157,17 +157,27 @@ async def getWells(item: WhatIfRequest):
 
     return rs
 
-@router.get("/{asset_id}/nearby_components_within_two_miles/{asset_type}")
-async def get_components_within_two_miles(asset_id: str, asset_type: str):
+@router.post("/nearby_components")
+async def get_components_within_two_miles(
+        item: NearbyComponentRequest
+    ):
     """Get nearby components within 2 miles radius of a well.The results are precomputed and loaded when queried
 
     asset_id: Unique identifier of the asset
     """
-    
+   
+    print(item)
+
+    wellNames = "'{" + ",".join(map(lambda x: str(x), item.productionWellList)) + "}'"
+
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
-                cur.execute(f"""SELECT * FROM fetchNearbyComponents({asset_id}, '{asset_type}');""")
+                sql = f"""SELECT * FROM fetchNearbyComponents({wellNames});"""
+               
+                print(sql)
+                cur.execute(sql)
 
                 rs = cur.fetchall()
+                
                 conn.commit()
     return rs

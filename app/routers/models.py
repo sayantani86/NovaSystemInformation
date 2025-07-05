@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-class ActionableParametersForWellGroup(BaseModel):
-    choke: float
+class NearbyComponentRequest(BaseModel):
+    productionWellList: list[float] = []
 
 class WhatIfRequest(BaseModel):
     productionWellList: list[float] = []
