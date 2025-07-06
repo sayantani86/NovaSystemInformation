@@ -174,10 +174,16 @@ async def get_components_within_two_miles(
         with conn.cursor() as cur:
                 sql = f"""SELECT * FROM fetchNearbyComponents({wellNames});"""
                
-                print(sql)
                 cur.execute(sql)
 
                 rs = cur.fetchall()
                 
                 conn.commit()
-    return rs
+
+    resp = dict()
+
+    for j in rs:
+        for k, v in j.items():
+            resp[k] = v
+
+    return resp
