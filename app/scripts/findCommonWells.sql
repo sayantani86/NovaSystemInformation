@@ -1,4 +1,4 @@
-DROP TABLE maps.wells_merged_by_name;
+DROP TABLE maps.wells_merged_by_name CASCADE;
 
 CREATE TABLE maps.wells_merged_by_name AS (
     select w1.description,
@@ -38,7 +38,13 @@ CREATE TABLE maps.wells_merged_by_name AS (
                 regexp_replace(
                     regexp_replace(
                         regexp_replace(
-				regexp_replace(regexp_replace(regexp_replace((regexp_match(w1.description, '(.*[0-9]{1,}H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'), 
+				regexp_replace(
+					regexp_replace(
+						regexp_replace(
+							(regexp_match(w1.description, '(.*[0-9]{1,}\s*H).*'))[1], 
+						'NO\W', '', 1, 0, 'i'), 
+					'SA', ''), 
+				'^NO', '', 1, 0, 'i'), 
                         'HUNTER', '', 1, 0, 'i'), 
                     '[#|-|,|.|\W+]', '', 1, 0, 'i'),
                 '\s{1,}', '', 1, 0, 'i'), 
@@ -58,7 +64,15 @@ CREATE TABLE maps.wells_merged_by_name AS (
                                                                             regexp_replace(
                                                                                 regexp_replace(
                                                                                         regexp_replace(
-                                                                                            regexp_replace(regexp_replace(regexp_replace(regexp_replace((regexp_match(w2.well_name, '(.*[0-9]{1,}H).*'))[1], 'WAVELITE', 'WAVELLITE'),'SA', ''),'NO\W', '', 1, 0, 'i'), '^NO', '', 1, 0, 'i'),
+                                                                                            regexp_replace(
+												regexp_replace(
+													regexp_replace(
+														regexp_replace(
+															(regexp_match(w2.well_name, '(.*[0-9]{1,}\s*H).*'))[1], 
+														'WAVELITE', 'WAVELLITE'), 
+													'SA', ''),
+												'NO\W', '', 1, 0, 'i'), 
+											'^NO', '', 1, 0, 'i'),
                                                                                 'HUNTER', '', 1, 0, 'i'),
                                                                         '[#|-|,|.|\W+]', '', 1, 0, 'i'),
                                                                 '\s{1,}', '', 1, 0, 'i'),
@@ -71,14 +85,20 @@ CREATE TABLE maps.wells_merged_by_name AS (
                     'LEELJ', 'LJLEE'), 
                 'SIMPERJOSEPH', 'JOSEPHSIMPER'), 
             '^BERGERJ', 'JBERGER'), 
-        '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),'BERCKENHOFFA', 'BERCKENHOFF') AS "Well_Name_nowhitespace",
+        '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),'BERCKENHOFFA', 'BERCKENHOFF') baytex_wells_nowhitespace,
 regexp_replace(regexp_replace(regexp_replace(regexp_replace(
                 regexp_replace(
                     regexp_replace(
                         regexp_replace(
                             regexp_replace(
                                 regexp_replace(
-                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w3.wellname, '(.*[0-9]{1,}H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
+                                    regexp_replace(
+					regexp_replace(
+						regexp_replace(
+							(regexp_match(w3.wellname, '(.*[0-9]{1,}\s*H).*'))[1], 
+						'NO\W', '', 1, 0, 'i'), 
+					'SA', ''), 
+				   '^NO', '', 1, 0, 'i'),
                                 'HUNTER', '', 1, 0, 'i'),
                             '[#|-|,|.|\W+]', '', 1, 0, 'i'),
                          '\s{1,}', '', 1, 0, 'i'),
@@ -93,8 +113,14 @@ ON
                         regexp_replace(
                             regexp_replace(
                                 regexp_replace(
-                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w1.description, '(.*[0-9]{1,}H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
-			       	'HUNTER', '', 1, 0, 'i'), 
+                                    regexp_replace(
+					regexp_replace(
+						regexp_replace(
+							(regexp_match(w1.description, '(.*[0-9]{1,}\s*H).*'))[1], 
+						'NO\W', '', 1, 0, 'i'), 
+					'SA', ''), 
+				'^NO', '', 1, 0, 'i'),
+			    'HUNTER', '', 1, 0, 'i'), 
                             '[#|-|,|.|\W+]', '', 1, 0, 'i'), 
                          '\s{1,}', '', 1, 0, 'i'), 
                     'UNIT', '', 1, 0, 'i'), 
@@ -108,7 +134,7 @@ ON
 									regexp_replace(
 									       	regexp_replace(
 											regexp_replace(regexp_replace(
-                                                                	regexp_replace(regexp_replace((regexp_match(w2.well_name, '(.*[0-9]{1,}H).*'))[1], 'WAVELITE', 'WAVELLITE'), 'SA', ''), 
+                                                                	regexp_replace(regexp_replace((regexp_match(w2.well_name, '(.*[0-9]{1,}\s*H).*'))[1], 'WAVELITE', 'WAVELLITE'), 'SA', ''), 
                                                             'NO\W', '', 1, 0, 'i'), '^NO', '', 1, 0, 'i'), 
                                                         'HUNTER', '', 1, 0, 'i'), 
                                                     '[#|-|,|.|\W+]', '', 1, 0, 'i'), 
@@ -124,7 +150,7 @@ ON
                         regexp_replace(
                             regexp_replace(
                                 regexp_replace(
-                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w3.wellname, '(.*[0-9]{1,}H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
+                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w3.wellname, '(.*[0-9]{1,}\s*H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
                                 'HUNTER', '', 1, 0, 'i'),
                             '[#|-|,|.|\W+]', '', 1, 0, 'i'),
                          '\s{1,}', '', 1, 0, 'i'),
@@ -136,7 +162,7 @@ ON
                         regexp_replace(
                             regexp_replace(
                                 regexp_replace(
-                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w1.description, '(.*[0-9]{1,}H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
+                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w1.description, '(.*[0-9]{1,}\s*H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
                                 'HUNTER', '', 1, 0, 'i'),
                             '[#|-|,|.|\W+]', '', 1, 0, 'i'),
                          '\s{1,}', '', 1, 0, 'i'),
