@@ -12,7 +12,7 @@ BEGIN
 		
 		RETURN QUERY SELECT 
 			p.refid, 
-			p.items as pipelines 
+			string_to_table(p.items, '|') as pipelines 
 		FROM 
 			maps.nearby_pipelines p 
 		WHERE
