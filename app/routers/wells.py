@@ -180,10 +180,4 @@ async def get_components_within_two_miles(
                 
                 conn.commit()
 
-    resp = dict()
-
-    for j in rs:
-        for k, v in j.items():
-            resp[k] = v
-
-    return resp
+    return pd.DataFrame(rs).to_dict(orient='records')
