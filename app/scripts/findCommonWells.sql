@@ -33,26 +33,75 @@ CREATE TABLE maps.wells_merged_by_name AS (
         		date_part('year', wl1_begindt::date)::text || '-' || date_part('month', wl1_begindt::date)::text || '-' || date_part('day', wl1_begindt::date)::text || ' to ' ||
         		date_part('year', wl1_enddt::date)::text || '-' || date_part('month', wl1_enddt::date)::text || '-' || date_part('day', wl1_enddt::date)::text
 	END AS "GL2 Range",
-        regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(
-            regexp_replace(
+	(regexp_match(
                 regexp_replace(
-                    regexp_replace(
+                regexp_replace(
                         regexp_replace(
-				regexp_replace(
-					regexp_replace(
-						regexp_replace(
-							(regexp_match(w1.description, '(.*[0-9]{1,}\s*H).*'))[1], 
-						'NO\W', '', 1, 0, 'i'), 
-					'SA', ''), 
-				'^NO', '', 1, 0, 'i'), 
-                        'HUNTER', '', 1, 0, 'i'), 
-                    '[#|-|,|.|\W+]', '', 1, 0, 'i'),
-                '\s{1,}', '', 1, 0, 'i'), 
-            'UNIT', '', 1, 0, 'i'), 
-        'LTD', 'LIMITED', 1, 0, 'i'),'RCRJANE', 'RCRSJANE'), 'McCREARY', 'MCCREARY', 1, 0, 'i'), '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),'BERCKENHOFFA', 'BERCKENHOFF')
- AS description_nowhitespace, 
-        regexp_replace(regexp_replace(
-            regexp_replace(
+                        regexp_replace(
+                                regexp_replace(
+                                        regexp_replace(
+                                                regexp_replace(
+                                                        regexp_replace(
+                                                                regexp_replace(
+                                                                        regexp_replace(
+                                                                                regexp_replace(w1.description, '(DUBOSE UNIT)(.*\yNO\y)(.*)', '\1\3', 1, 0),
+                                                                                '(DUBOSE UNIT.*)(WELL)(.*)', '\1\3'
+                                                                        ),
+                                                                '\(SA\)', '', 1, 0),
+                                                'HUNTER', '', 1, 0, 'i'),
+                                                '[#|-|,|.|\W+]', '', 1, 0, 'i'),
+                                                        'UNIT', '', 1, 0, 'i'),
+                                                'LTD', 'LIMITED', 1, 0, 'i'),
+                                        '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),
+                                'RCRJANE', 'RCRSJANE'),
+                        'McCREARY', 'MCCREARY', 1, 0, 'i'),
+                'BERCKENHOFFA', 'BERCKENHOFF'), '(.*[0-9]{1,}\s*H).*'))[1]
+description_nowhitespace,
+	(regexp_match(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                        regexp_replace(w2.well_name, '(DUBOSE)(.*UNIT NO)(.*)', '\1\3', 1, 0),
+                        '(EBONY).*([0-9]H)', '\1\2'
+                ),
+                'WAVELITE', 'WAVELLITE'),
+                '\(SA\)', '', 1, 0),
+                '[#|-|,|.|\W+]', '', 1, 0 , 'i'),
+                'HUNTER', '', 1, 0, 'i'),
+                'UNIT', '', 1, 0, 'i'),
+                'LTD', 'LIMITED', 1, 0, 'i'),
+                '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),
+                'SHINERRANCHSOUTHERN', 'SHINERRANCHS', 1, 0, 'i'),
+                'WASHINGTONR', 'RWASHINGTON'),
+                'SCHAEFERRL', 'RLSCHAEFER'),
+                'McCREARY', 'MCCREARY', 1, 0, 'i'),
+                '^LEELJ', 'LJLEE'),
+                'SIMPERJOSEPH', 'JOSEPHSIMPER'),
+                '^BERGERJ', 'JBERGER'),
+                'FOREMAND', 'DFOREMAN'),
+                'BERCKENHOFFA', 'BERCKENHOFF'),
+                '(SOUTHERNBOCK)[AB]', '\1'),
+                '(SOUTHERNAMBER)[0-9]([0-9]H)', '\1\2'),
+        '\s\s*', '', 1, 0), '(.*[0-9]{1,}\s*H).*'))[1]
+baytex_wells_nowhitespace,
+(regexp_match(
                 regexp_replace(
                         regexp_replace(
                                 regexp_replace(
@@ -61,111 +110,129 @@ CREATE TABLE maps.wells_merged_by_name AS (
                                                         regexp_replace(
                                                                 regexp_replace(
                                                                         regexp_replace(
-                                                                            regexp_replace(
                                                                                 regexp_replace(
-                                                                                        regexp_replace(
-                                                                                            regexp_replace(
-												regexp_replace(
-													regexp_replace(
-														regexp_replace(
-															(regexp_match(w2.well_name, '(.*[0-9]{1,}\s*H).*'))[1], 
-														'WAVELITE', 'WAVELLITE'), 
-													'SA', ''),
-												'NO\W', '', 1, 0, 'i'), 
-											'^NO', '', 1, 0, 'i'),
-                                                                                'HUNTER', '', 1, 0, 'i'),
-                                                                        '[#|-|,|.|\W+]', '', 1, 0, 'i'),
-                                                                '\s{1,}', '', 1, 0, 'i'),
+                                                                                        regexp_replace(w3.wellname, '(DUBOSE UNIT)(.*\yNO\y)(.*)', '\1\3'),
+                                                                                '\(SA\)', '', 1, 0),
+                                                                        'HUNTER', '', 1, 0, 'i'),
+                                                                '[#|-|,|.|\W+]', '', 1, 0, 'i'),
                                                         'UNIT', '', 1, 0, 'i'),
-                                                'LTD', 'LIMITED', 1, 0, 'i'), 
-                                        'SHINERRANCHSOUTHERN', 'SHINERRANCHS'), 
-                                'WASHINGTONR', 'RWASHINGTON'), 
-                            'SCHAEFERRL', 'RLSCHAEFER'), 
-                        'McCREARY', 'MCCREARY', 1, 0, 'i'), 
-                    'LEELJ', 'LJLEE'), 
-                'SIMPERJOSEPH', 'JOSEPHSIMPER'), 
-            '^BERGERJ', 'JBERGER'), 
-        '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),'BERCKENHOFFA', 'BERCKENHOFF') baytex_wells_nowhitespace,
-regexp_replace(regexp_replace(regexp_replace(regexp_replace(
-                regexp_replace(
-                    regexp_replace(
-                        regexp_replace(
-                            regexp_replace(
-                                regexp_replace(
-                                    regexp_replace(
-					regexp_replace(
-						regexp_replace(
-							(regexp_match(w3.wellname, '(.*[0-9]{1,}\s*H).*'))[1], 
-						'NO\W', '', 1, 0, 'i'), 
-					'SA', ''), 
-				   '^NO', '', 1, 0, 'i'),
-                                'HUNTER', '', 1, 0, 'i'),
-                            '[#|-|,|.|\W+]', '', 1, 0, 'i'),
-                         '\s{1,}', '', 1, 0, 'i'),
-                    'UNIT', '', 1, 0, 'i'),
-                 'LTD', 'LIMITED', 1, 0, 'i'), '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'), 'RCRJANE', 'RCRSJANE'), 'McCREARY', 'MCCREARY', 1, 0, 'i') ,'BERCKENHOFFA', 'BERCKENHOFF') AS quorum_well_nowhitespace
-FROM 
+                                                'LTD', 'LIMITED', 1, 0, 'i'),
+                                        '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),
+                                'RCRJANE', 'RCRSJANE'),
+                        'McCREARY', 'MCCREARY', 1, 0, 'i'),
+                'BERCKENHOFFA', 'BERCKENHOFF'), '(.*[0-9]{1,}\s*H).*'))[1]
+quorum_well_nowhitespace
+FROM	     
     master_list_of_baytex_wells w1 LEFT JOIN maps.baytex_wells w2 
-ON 
-           regexp_replace(regexp_replace(regexp_replace(regexp_replace(
+ON
+	(regexp_match(
+		regexp_replace(
                 regexp_replace(
-                    regexp_replace(
-                        regexp_replace(
-                            regexp_replace(
-                                regexp_replace(
-                                    regexp_replace(
-					regexp_replace(
-						regexp_replace(
-							(regexp_match(w1.description, '(.*[0-9]{1,}\s*H).*'))[1], 
-						'NO\W', '', 1, 0, 'i'), 
-					'SA', ''), 
-				'^NO', '', 1, 0, 'i'),
-			    'HUNTER', '', 1, 0, 'i'), 
-                            '[#|-|,|.|\W+]', '', 1, 0, 'i'), 
-                         '\s{1,}', '', 1, 0, 'i'), 
-                    'UNIT', '', 1, 0, 'i'), 
-                 'LTD', 'LIMITED', 1, 0, 'i'), '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'), 'RCRJANE', 'RCRSJANE'), 'McCREARY', 'MCCREARY', 1, 0, 'i'),
-'BERCKENHOFFA', 'BERCKENHOFF') 
-                                = regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(
-					regexp_replace(
-						regexp_replace(
-							regexp_replace(
-								regexp_replace(
-									regexp_replace(
-									       	regexp_replace(
-											regexp_replace(regexp_replace(
-                                                                	regexp_replace(regexp_replace((regexp_match(w2.well_name, '(.*[0-9]{1,}\s*H).*'))[1], 'WAVELITE', 'WAVELLITE'), 'SA', ''), 
-                                                            'NO\W', '', 1, 0, 'i'), '^NO', '', 1, 0, 'i'), 
-                                                        'HUNTER', '', 1, 0, 'i'), 
-                                                    '[#|-|,|.|\W+]', '', 1, 0, 'i'), 
-                                                '\s{1,}', '', 1, 0, 'i'), 
-                                            'UNIT', '', 1, 0, 'i'), 
-                                        'LTD', 'LIMITED', 1, 0, 'i'), 
-                                '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'), 'SHINERRANCHSOUTHERN', 'SHINERRANCHS', 1, 0, 'i'), 'WASHINGTONR', 'RWASHINGTON'), 'SCHAEFERRL', 'RLSCHAEFER'), 'McCREARY', 'MCCREARY', 1, 0, 'i'), '^LEELJ', 'LJLEE'), 'SIMPERJOSEPH', 'JOSEPHSIMPER'), '^BERGERJ', 'JBERGER'), 'FOREMAND', 'DFOREMAN'), 'BERCKENHOFFA', 'BERCKENHOFF') 
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+                regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+                	regexp_replace(w1.description, '(DUBOSE UNIT)(.*\yNO\y)(.*)', '\1\3', 1, 0),
+		'(DUBOSE UNIT.*)(WELL)(.*)', '\1\3'),
+		'(EBONY).*([0-9]H)', '\1\2'),
+		'\(SA\)', '', 1, 0),
+                'HUNTER', '', 1, 0, 'i'),
+                '[#|-|,|.|\W+]', '', 1, 0, 'i'),
+                'UNIT', '', 1, 0, 'i'),
+                'LTD', 'LIMITED', 1, 0, 'i'),
+                '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),
+                'RCRJANE', 'RCRSJANE'),
+                'McCREARY', 'MCCREARY', 1, 0, 'i'),
+                'BERCKENHOFFA', 'BERCKENHOFF'), 
+	'(.*[0-9]{1,}\s*H).*'))[1]
+                                = (regexp_match(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+		regexp_replace(
+			regexp_replace(w2.well_name, '(DUBOSE)(.*UNIT NO)(.*)', '\1\3', 1, 0),
+		'(EBONY).*([0-9]H)', '\1\2'),
+		'WAVELITE', 'WAVELLITE'),
+		'\(SA\)', '', 1, 0),
+		'[#|-|,|.|\W+]', '', 1, 0 , 'i'),
+		'HUNTER', '', 1, 0, 'i'),
+                'UNIT', '', 1, 0, 'i'), 
+                'LTD', 'LIMITED', 1, 0, 'i'), 
+                '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'), 
+		'SHINERRANCHSOUTHERN', 'SHINERRANCHS', 1, 0, 'i'),
+		'WASHINGTONR', 'RWASHINGTON'), 
+		'SCHAEFERRL', 'RLSCHAEFER'), 
+		'McCREARY', 'MCCREARY', 1, 0, 'i'), 
+		'^LEELJ', 'LJLEE'), 
+		'SIMPERJOSEPH', 'JOSEPHSIMPER'), 
+		'^BERGERJ', 'JBERGER'), 
+		'FOREMAND', 'DFOREMAN'), 
+		'BERCKENHOFFA', 'BERCKENHOFF'),
+       		'(SOUTHERNBOCK)[AB]', '\1'),
+		'(SOUTHERNAMBER)[0-9]([0-9]H)', '\1\2'),
+		'\s\s*', '', 1, 0), 
+		'(.*[0-9]{1,}\s*H).*'))[1] 
 LEFT JOIN maps.quorum_wells w3 
 ON
-		regexp_replace(regexp_replace(regexp_replace(regexp_replace(
+	(regexp_match(
+		regexp_replace(
+			regexp_replace(
+				regexp_replace(
+					regexp_replace(
+						regexp_replace(
+                					regexp_replace(
+                        					regexp_replace(
+                            						regexp_replace(
+										regexp_replace(
+											regexp_replace(w3.wellname, '(DUBOSE UNIT)(.*\yNO\y)(.*)', '\1\3'),
+                                						'\(SA\)', '', 1, 0), 
+                                					'HUNTER', '', 1, 0, 'i'),
+                            					'[#|-|,|.|\W+]', '', 1, 0, 'i'),
+                    					'UNIT', '', 1, 0, 'i'),
+                 				'LTD', 'LIMITED', 1, 0, 'i'), 
+					'^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'), 
+				'RCRJANE', 'RCRSJANE'), 
+			'McCREARY', 'MCCREARY', 1, 0, 'i'), 
+		'BERCKENHOFFA', 'BERCKENHOFF'), '(.*[0-9]{1,}\s*H).*'))[1] = 
+(regexp_match(
                 regexp_replace(
-                    regexp_replace(
-                        regexp_replace(
-                            regexp_replace(
+                	regexp_replace(
+                        	regexp_replace(
+                        	regexp_replace(
                                 regexp_replace(
-                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w3.wellname, '(.*[0-9]{1,}\s*H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
-                                'HUNTER', '', 1, 0, 'i'),
-                            '[#|-|,|.|\W+]', '', 1, 0, 'i'),
-                         '\s{1,}', '', 1, 0, 'i'),
-                    'UNIT', '', 1, 0, 'i'),
-                 'LTD', 'LIMITED', 1, 0, 'i'), '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'), 'RCRJANE', 'RCRSJANE'), 'McCREARY', 'MCCREARY', 1, 0, 'i'), 'BERCKENHOFFA', 'BERCKENHOFF') = 
-	regexp_replace(regexp_replace(regexp_replace(regexp_replace(
-                regexp_replace(
-                    regexp_replace(
-                        regexp_replace(
-                            regexp_replace(
                                 regexp_replace(
-                                    regexp_replace(regexp_replace(regexp_replace((regexp_match(w1.description, '(.*[0-9]{1,}\s*H).*'))[1], 'NO\W', '', 1, 0, 'i'), 'SA', ''), '^NO', '', 1, 0, 'i'),
-                                'HUNTER', '', 1, 0, 'i'),
-                            '[#|-|,|.|\W+]', '', 1, 0, 'i'),
-                         '\s{1,}', '', 1, 0, 'i'),
-                    'UNIT', '', 1, 0, 'i'),
-                 'LTD', 'LIMITED', 1, 0, 'i'), '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'), 'RCRJANE', 'RCRSJANE'), 'McCREARY', 'MCCREARY', 1, 0, 'i'), 'BERCKENHOFFA','BERCKENHOFF')
-); 
+                                                regexp_replace(
+                                                        regexp_replace(
+                                                                regexp_replace(
+									regexp_replace(w1.description, '(DUBOSE UNIT)(.*NO.*)( [0-9] )(\yWELL\y)*(.*)', '\1\3\5'),
+                                                        	'\(SA\)', '', 1, 0),
+                                                'HUNTER', '', 1, 0, 'i'),
+                                                '[#|-|,|.|\W+]', '', 1, 0, 'i'),
+                                                'UNIT', '', 1, 0, 'i'),
+                                                'LTD', 'LIMITED', 1, 0, 'i'),
+                                        '^JAKEBERGERCC', 'JAKEBERGERJRCATTLECOMPANY'),
+                                'RCRJANE', 'RCRSJANE'),
+                        'McCREARY', 'MCCREARY', 1, 0, 'i'),
+                'BERCKENHOFFA', 'BERCKENHOFF'), '(.*[0-9]{1,}\s*H).*'))[1]
+);
