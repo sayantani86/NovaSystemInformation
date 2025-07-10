@@ -187,4 +187,28 @@ async def get_components_within_two_miles(
                 
                 conn.commit()
 
-    return pd.DataFrame(rs).to_dict(orient='records')
+    df = pd.DataFrame(rs)
+    df.rename(columns= {
+        'q_wellname': 'wellname',
+        'q_refid': 'refid',
+        'q_entry_date': 'entry_date',
+        'q_sequential_month': 'sequential_month',
+        'q_sequential_day': 'sequential_day',
+        'q_linepressure': 'linepressure',
+        'q_casingpressure': 'casingpressure',
+        'q_flowingtubingpressure': 'flowingtubingpressure',
+        'q_allocatedgasinjectionvolume': 'allocatedgasinjectionvolume',
+        'q_choke': 'choke',
+        'q_welllift_flag': 'welllift_flag',
+        'q_wl_type': 'wl_type',
+        'q_shutin_flag1': 'shutin_flag1',
+        'q_shutin_flag3': 'shutin_flag3',
+        'q_rampup_flag': 'rampup_flag',
+        'q_allocatedproductionoilvolume': 'allocatedproductionoilvolume',
+        'q_allocatedproductionoilvolume_lag1': 'allocatedproductionoilvolume_lag1',
+        'q_allocatedproductionoilvolume_lag2': 'allocatedproductionoilvolume_lag2',
+        'q_allocatedproductionoilvolume_lag3': 'allocatedproductionoilvolume_lag3',
+        'q_wltype_encoded': 'wltype_encoded'
+    }, inplace=True)
+
+    return df.to_dict(orient='records')
