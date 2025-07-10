@@ -1,7 +1,8 @@
 DROP FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num integer, start_date text, end_date text);
 
 CREATE OR REPLACE FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num integer, st_dt text, et_dt text) RETURNS TABLE (
-	q_well_name varchar,
+	q_wellname varchar,
+	q_refid float,
 	q_entry_date date,
 	q_sequential_month integer,
 	q_sequential_day integer,
@@ -12,13 +13,14 @@ CREATE OR REPLACE FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num i
 	q_choke float,
 	q_welllift_flag boolean,
 	q_wl_type varchar,
-	q_shutin_flag boolean,
+	q_shutin_flag1 integer,
+	q_shutin_flag3 integer,
 	q_rampup_flag boolean,
 	q_allocatedproductionoilvolume numeric(13, 2),
         q_allocatedproductionoilvolume_lag1 numeric(13, 2),
         q_allocatedproductionoilvolume_lag2 numeric(13, 2),
         q_allocatedproductionoilvolume_lag3 numeric(13, 2),
-        q_wltype_encoded integer
+        q_wltype_encoded float
 ) AS
 $$
 DECLARE
@@ -44,7 +46,8 @@ BEGIN
         END IF;
 
 	fnc_cmd := 'SELECT 
-		wellname as well_name,
+		wellname,
+		refid,
 		entry_date,
 		sequential_month,
 		sequential_day,
@@ -55,7 +58,8 @@ BEGIN
 		choke,
 		welllift_flag::boolean,
 		wl_type,
-		shutin_flag::boolean,
+		shutin_flag1,
+		shutin_flag3,
 		rampup_flag::boolean,
 		allocatedproductionoilvolume,
 		allocatedproductionoilvolume_lag1,

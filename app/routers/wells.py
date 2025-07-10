@@ -115,7 +115,8 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
     df = pd.DataFrame(rs)
 
     df.rename(columns= {
-        'q_well_name': 'wellname',
+        'q_wellname': 'wellname',
+        'q_refid': 'refid',
         'q_entry_date': 'entry_date',
         'q_sequential_month': 'sequential_month',
         'q_sequential_day': 'sequential_day',
@@ -126,7 +127,8 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
         'q_choke': 'choke',
         'q_welllift_flag': 'welllift_flag',
         'q_wl_type': 'wl_type',
-        'q_shutin_flag': 'shutin_flag',
+        'q_shutin_flag1': 'shutin_flag1',
+        'q_shutin_flag3': 'shutin_flag3',
         'q_rampup_flag': 'rampup_flag',
         'q_allocatedproductionoilvolume': 'allocatedproductionoilvolume',
         'q_allocatedproductionoilvolume_lag1': 'allocatedproductionoilvolume_lag1',
