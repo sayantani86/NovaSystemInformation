@@ -115,7 +115,7 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
     df = pd.DataFrame(rs)
 
     df.rename(columns= {
-        'q_wellname': 'wellname',
+        'q_well_name': 'wellname',
         'q_entry_date': 'entry_date',
         'q_sequential_month': 'sequential_month',
         'q_sequential_day': 'sequential_day',
