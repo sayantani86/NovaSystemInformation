@@ -1,6 +1,6 @@
 DROP FUNCTION fetchNearbyComponents(refid_arr numeric[]);
 
-CREATE OR REPLACE FUNCTION fetchNearbyComponents(refid_arr numeric[]) RETURNS SETOF maps.nearby_pipelines AS 
+CREATE OR REPLACE FUNCTION fetchNearbyComponents(refid_arr numeric[]) RETURNS TABLE (wellname varchar, refid numeric, pipelines text[]) AS 
 $$
 DECLARE
 	r numeric;
@@ -10,9 +10,10 @@ BEGIN
 	FOREACH r IN ARRAY refid_arr LOOP
 		RAISE NOTICE 'r = %', r;
 		
-		RETURN QUERY SELECT 
+		RETURN QUERY SELECT
+	       		p.wellname,	
 			p.refid, 
-			string_to_table(p.items, '|') as pipelines 
+			string_to_array(p.items, '|') as pipelines 
 		FROM 
 			maps.nearby_pipelines p 
 		WHERE
