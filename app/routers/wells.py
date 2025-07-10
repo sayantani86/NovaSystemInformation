@@ -72,7 +72,8 @@ async def read_assets(asset_id: str):
 
                 rs = cur.fetchall()
                 conn.commit()
-            except:
+            except Exception as e:
+                print(e)
                 raise HTTPException(
                     status_code=500, detail="The server has encountered an error"
                 )
@@ -115,19 +116,25 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
 
     df.rename(columns= {
         'q_wellname': 'wellname',
-        'q_entry_date': 'Entry_Date',
-        'q_flowingtubingpressure': 'FlowingTubingPressure',
+        'q_refid': 'refid',
+        'q_entry_date': 'entry_date',
+        'q_sequential_month': 'sequential_month',
+        'q_sequential_day': 'sequential_day',
+        'q_linepressure': 'linepressure',
         'q_casingpressure': 'casingpressure',
-        'q_linepressure': 'LinePressure',
-        'q_allocatedgasinjectionvolume': 'AllocatedGasInjectionVolume',
-        'q_choke': 'Choke',
-        'q_allocatedproductionoilvolume': 'AllocatedProductionOilVolume',
-        'q_gasliftgasmeasuredvolume': 'GasLiftGasMeasuredVolume',
-        'q_gaslift_flag': 'gaslift_flag',
-        'q_rampup_flag': 'rampup_flag',
+        'q_flowingtubingpressure': 'flowingtubingpressure',
+        'q_allocatedgasinjectionvolume': 'allocatedgasinjectionvolume',
+        'q_choke': 'choke',
+        'q_welllift_flag': 'welllift_flag',
+        'q_wl_type': 'wl_type',
         'q_shutin_flag1': 'shutin_flag1',
-        'q_shutin_flag2': 'shutin_flag2',
-        'q_sequential_month': 'sequential_month'
+        'q_shutin_flag3': 'shutin_flag3',
+        'q_rampup_flag': 'rampup_flag',
+        'q_allocatedproductionoilvolume': 'allocatedproductionoilvolume',
+        'q_allocatedproductionoilvolume_lag1': 'allocatedproductionoilvolume_lag1',
+        'q_allocatedproductionoilvolume_lag2': 'allocatedproductionoilvolume_lag2',
+        'q_allocatedproductionoilvolume_lag3': 'allocatedproductionoilvolume_lag3',
+        'q_wltype_encoded': 'wltype_encoded'
     }, inplace=True)
 
     return df.to_dict(orient='records')
