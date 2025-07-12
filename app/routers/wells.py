@@ -67,8 +67,10 @@ async def read_assets(asset_id: str):
                                 w_gl1 as "Gas Lift 2",
                                 w_gl1_range as "Gas Lift 2 period",
                                 w_gl2 as "Gas Lift 1",
-                                w_gl2_range as "Gas Lift 1 period"
-                FROM getWellDetails('{asset_id}')""")
+                                w_gl2_range as "Gas Lift 1 period",
+                                min_entry_date as hist_min_date,
+                                max_entry_date as hist_max_date
+                FROM getWellDetails({asset_id})""")
 
                 rs = cur.fetchall()
                 conn.commit()
