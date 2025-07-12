@@ -4,7 +4,7 @@ import subprocess
 import psycopg
 from psycopg.rows import dict_row
 from typing import Annotated
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Request
 
 from .models import *
 
@@ -146,17 +146,19 @@ async def getWells(item: WhatIfRequest):
     item: An object of a list of RefId and a date range for the group
     """
 
-    actionableInputs = tuple(zip(item.productionWellList, [item.startDate]*len(item.productionWellList), [item.endDate]*len(item.productionWellList)))
+    actionableInputs = tuple(zip(item.productionWellList, [item.startDate] * len(item.productionWellList), [item.endDate] * len(item.productionWellList)))
+
+    #wellNames = "'{" + ",".join(map(lambda x: str(x), item.productionWellList)) + "}'"
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
                 cur.execute("DROP TABLE IF EXISTS quorum_whatif.whatif_inputs;")
-
+                
                 cur.execute("CREATE TABLE quorum_whatif.whatif_inputs(refid float, start_date varchar, end_date varchar);")
 
                 cur.executemany(f"INSERT INTO quorum_whatif.whatif_inputs(refid, start_date, end_date) values (%s, %s, %s)", actionableInputs)
 
-                cur.execute("""SELECT
+                cur.execute(f"""SELECT
                                 q_wellname as wellname,
                                 q_refid as refid,
                                 q_entry_date as entry_date,
@@ -177,7 +179,8 @@ async def getWells(item: WhatIfRequest):
                                 q_allocatedproductionoilvolume_lag2 as allocatedproductionoilvolume_lag2,
                                 q_allocatedproductionoilvolume_lag3 as allocatedproductionoilvolume_lag3,
                                 q_wltype_encoded as wltype_encoded
-                            FROM getWhatIfInputsForGroupedWells();""")
+                            FROM 
+                                getWhatIfInputsForGroupedWells();""")
 
                 rs = cur.fetchall()
                 
@@ -194,14 +197,18 @@ async def get_components_within_two_miles(
     asset_id: Unique identifier of the asset
     """
    
-    print(item)
-
     wellNames = "'{" + ",".join(map(lambda x: str(x), item.productionWellList)) + "}'"
+
+    req = "'{" + f'"productionWellList": {item.productionWellList}' + "}'::jsonb"
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
-                sql = f"""SELECT * FROM fetchNearbyComponents({wellNames});"""
-               
+                #sql = f"""SELECT * FROM fetchNearbyComponents({wellNames});"""
+
+                sql = f"""SELECT * FROM fetchNearbyComponentsNew({req});"""
+              
+                print(sql)
+
                 cur.execute(sql)
 
                 rs = cur.fetchall()
