@@ -2,7 +2,7 @@ import os
 import subprocess
 from fastapi import APIRouter, HTTPException, Request
 
-from ..auth import *
+#from ..auth import *
 
 router = APIRouter(
     prefix="/maps",
