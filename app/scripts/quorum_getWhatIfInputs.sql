@@ -1,4 +1,4 @@
-DROP FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num integer, start_date text, end_date text);
+DROP FUNCTION getRangedDataFromQuorumByWell(text, integer, text, text);
 
 CREATE OR REPLACE FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num integer, st_dt text, et_dt text) RETURNS TABLE (
 	q_wellname varchar,
@@ -14,13 +14,17 @@ CREATE OR REPLACE FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num i
 	q_welllift_flag boolean,
 	q_wl_type varchar,
 	q_shutin_flag1 integer,
-	q_shutin_flag3 integer,
+	q_shutin_flag3 float,
 	q_rampup_flag boolean,
 	q_allocatedproductionoilvolume numeric(13, 2),
         q_allocatedproductionoilvolume_lag1 numeric(13, 2),
         q_allocatedproductionoilvolume_lag2 numeric(13, 2),
         q_allocatedproductionoilvolume_lag3 numeric(13, 2),
-        q_wltype_encoded float
+        q_wltype_encoded float,
+	hist_min_date date,
+	hist_max_date date,
+	cal_min_date date,
+	cal_max_date date
 ) AS
 $$
 DECLARE
@@ -47,7 +51,7 @@ BEGIN
 
 	fnc_cmd := 'SELECT 
 		wellname,
-		refid,
+		prod.refid,
 		entry_date,
 		sequential_month,
 		sequential_day,
@@ -65,36 +69,23 @@ BEGIN
 		allocatedproductionoilvolume_lag1,
 		allocatedproductionoilvolume_lag2,
 		allocatedproductionoilvolume_lag3,
-		wltype_encoded
+		wltype_encoded,
+		c.min_entry_date,
+		c.max_entry_date, 
+		d.calendar_min, 
+		d.calendar_max
        	FROM 
-		quorum_range_partitioned_jul9 
+		quorum_range_partitioned_jul10 prod
+	LEFT JOIN 
+		quorum_range_partitioned_jul10_hist_min_max_date c
+        ON
+        	prod.refid::numeric = c.refid_out::numeric
+        LEFT JOIN 
+		calendar_minmax d
+        ON 
+		prod.refid::numeric = d.refid::numeric	
         WHERE
-		(regexp_match(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                regexp_replace(
-                        regexp_replace(wellname, ''(DUBOSE UNIT)(.*\yNO\y)(.*)'', ''\1\3'', 1, 0),
-                ''(DUBOSE UNIT.*)(WELL)(.*)'', ''\1\3''),
-                ''(EBONY).*([0-9]H)'', ''\1\2''),
-                ''\(SA\)'', '''', 1, 0),
-                ''HUNTER'', '''', 1, 0, ''i''),
-                ''[#|-|,|.|\W+]'', '''', 1, 0, ''i''),
-                ''UNIT'', '''', 1, 0, ''i''),
-                ''LTD'', ''LIMITED'', 1, 0, ''i''),
-                ''\yJAKEBERGERCC\y'', ''JAKEBERGERJRCATTLECOMPANY''),
-                ''RCRJANE'', ''RCRSJANE''),
-                ''McCREARY'', ''MCCREARY'',1, 0,''i''),
-                ''(BERCKENHOFF)A'', ''\1''),
-        ''(.*[0-9]{1,}\s*H).*''))[1] = ' || quote_literal(r.description_nowhitespace) || ' and entry_date::date >=' || quote_literal(st_dt) || ' and entry_date::date <= ' || quote_literal(et_dt);
-
+		prod.refid::numeric = ' || getRangedDataFromQuorumByWell.refid::numeric || ' and entry_date::date >=' || quote_literal(st_dt) || ' and entry_date::date <= ' || quote_literal(et_dt);
 
         RETURN QUERY EXECUTE fnc_cmd;
 

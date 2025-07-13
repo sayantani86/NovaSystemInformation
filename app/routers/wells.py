@@ -70,7 +70,7 @@ async def read_assets(asset_id: str):
                                 w_gl2_range as "Gas Lift 1 period",
                                 min_entry_date as hist_min_date,
                                 max_entry_date as hist_max_date,
-                                calendar_min
+                                calendar_min,
                                 calendar_max
                 FROM getWellDetails({asset_id})""")
 
@@ -107,8 +107,6 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
     """
 
     asset_id_sub = asset_id.replace('.01', '01')
-
-    print(f"SELECT * FROM getRangedDataFromQuorumByWell('{asset_id}', {asset_id_sub}, '{st_dt}', '{et_dt}')")
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
@@ -182,7 +180,11 @@ async def getWells(item: WhatIfRequest):
                                 q_allocatedproductionoilvolume_lag1 as allocatedproductionoilvolume_lag1,
                                 q_allocatedproductionoilvolume_lag2 as allocatedproductionoilvolume_lag2,
                                 q_allocatedproductionoilvolume_lag3 as allocatedproductionoilvolume_lag3,
-                                q_wltype_encoded as wltype_encoded
+                                q_wltype_encoded as wltype_encoded,
+                                hist_min_date,
+                                hist_max_date,
+                                cal_min_date,
+                                cal_max_date
                             FROM 
                                 getWhatIfInputsForGroupedWells();""")
 
