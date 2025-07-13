@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, HTTPException, Request
 
 from .models import *
+from ..auth import *
 
 router = APIRouter(
     prefix="/wells",
@@ -43,12 +44,14 @@ def read_assets(asset_id: str):
     return df.to_dict(orient='records')
 
 @router.get("/{asset_id}")
-async def read_assets(asset_id: str):
+async def read_assets(asset_id: str, request: Request = None):
     """Retrieves the details of a well.All information are from Quorum database and is not dependent on time
 
     asset_id: Unique identifier of the asset
     """
-    
+   
+    token = await verify_jwt_from_request(request)
+
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
             try:
