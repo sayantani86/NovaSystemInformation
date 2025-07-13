@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, HTTPException, Request
 
 from .models import *
-from ..auth import *
+#from ..auth import *
 
 router = APIRouter(
     prefix="/wells",
