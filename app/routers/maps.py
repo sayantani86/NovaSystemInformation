@@ -2,7 +2,8 @@ import os
 import subprocess
 from fastapi import APIRouter, HTTPException, Request
 
-#from ..auth import *
+#import asyncio
+from ..auth import *
 
 router = APIRouter(
     prefix="/maps",
@@ -46,7 +47,7 @@ async def map_data(request: Request = None):
     import psycopg
     from psycopg.rows import dict_row
 
-    #token = await verify_jwt_from_request(request)
+    token = await verify_jwt_from_request(request)
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123") as conn:
         with conn.cursor() as cur:
