@@ -212,18 +212,38 @@ async def get_components_within_two_miles(
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
-                #sql = f"""SELECT * FROM fetchNearbyComponents({wellNames});"""
-
                 sql = f"""SELECT * FROM fetchNearbyComponentsNew({req});"""
-              
-                print(sql)
-
                 cur.execute(sql)
-
                 rs = cur.fetchall()
-                
                 conn.commit()
 
     df = pd.DataFrame(rs)
 
     return df.to_dict(orient='records')
+
+@router.post("/multiwelldates")
+async def get_common_period(
+        item: NearbyComponentRequest
+    ):
+    req = "'{" + f'"productionWellList": {item.productionWellList}' + "}'::jsonb"
+
+    min_entry_date = None
+    max_entry_date = None
+
+    with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
+        with conn.cursor() as cur:
+
+            sql = f"""SELECT max(min_date) as cal_min_date FROM (SELECT * FROM get_multiwells_overlapping_period({req})) t;"""
+
+            cur.execute(sql)
+            
+            min_entry_date = cur.fetchone()
+
+            cur.execute(f"""SELECT min(max_date) as cal_max_date FROM (SELECT * FROM get_multiwells_overlapping_period({req})) t;""")
+
+            max_entry_date = cur.fetchone()
+
+            conn.commit()
+
+   
+    return (min_entry_date, max_entry_date)
