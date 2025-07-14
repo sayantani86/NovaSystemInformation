@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, HTTPException, Request
 
 from .models import *
-#from ..auth import *
+from ..auth import *
 
 router = APIRouter(
     prefix="/wells",
@@ -50,7 +50,7 @@ async def read_assets(asset_id: str, request: Request = None):
     asset_id: Unique identifier of the asset
     """
    
-    #token = await verify_jwt_from_request(request)
+    token = await verify_jwt_from_request(request)
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
