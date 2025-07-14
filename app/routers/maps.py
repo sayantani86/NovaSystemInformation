@@ -3,7 +3,7 @@ import subprocess
 from fastapi import APIRouter, HTTPException, Request
 
 #import asyncio
-from ..auth import *
+#from ..auth import *
 
 router = APIRouter(
     prefix="/maps",
