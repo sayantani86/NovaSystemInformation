@@ -70,11 +70,7 @@ async def read_assets(asset_id: str, request: Request = None):
                                 w_gl1 as "Gas Lift 2",
                                 w_gl1_range as "Gas Lift 2 period",
                                 w_gl2 as "Gas Lift 1",
-                                w_gl2_range as "Gas Lift 1 period",
-                                min_entry_date as hist_min_date,
-                                max_entry_date as hist_max_date,
-                                calendar_min,
-                                calendar_max
+                                w_gl2_range as "Gas Lift 1 period"
                 FROM getWellDetails({asset_id})""")
 
                 rs = cur.fetchall()
@@ -183,11 +179,7 @@ async def getWells(item: WhatIfRequest):
                                 q_allocatedproductionoilvolume_lag1 as allocatedproductionoilvolume_lag1,
                                 q_allocatedproductionoilvolume_lag2 as allocatedproductionoilvolume_lag2,
                                 q_allocatedproductionoilvolume_lag3 as allocatedproductionoilvolume_lag3,
-                                q_wltype_encoded as wltype_encoded,
-                                hist_min_date,
-                                hist_max_date,
-                                cal_min_date,
-                                cal_max_date
+                                q_wltype_encoded as wltype_encoded
                             FROM 
                                 getWhatIfInputsForGroupedWells();""")
 
