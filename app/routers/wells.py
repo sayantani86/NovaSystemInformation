@@ -56,7 +56,7 @@ async def read_assets(asset_id: str, request: Request = None):
         with conn.cursor() as cur:
             try:
                 cur.execute(f"""SELECT
-                                w_description as "Well Name"
+                                w_description as "Well Name",
                                 w_county as "County",
                                 w_state as "State",
                                 w_pv_wc_id as "RefID",
