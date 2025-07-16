@@ -56,21 +56,16 @@ async def read_assets(asset_id: str, request: Request = None):
         with conn.cursor() as cur:
             try:
                 cur.execute(f"""SELECT 
-                                w_description as "Well Name", 
                                 w_county as "County",
                                 w_state as "State",
                                 w_pv_wc_id as "RefID",
                                 w_mth_1st_activity as "First activity month",
                                 quorum_firstproductiondate as "First production date",
-                                shlx as "SHL X",
-                                shly as "SHL Y",
-                                w_longitude as "Longitude",
-                                w_latitude as "Latitude",
                                 w_foreman as "Foreman",
-                                w_gl1 as "Gas Lift 2",
-                                w_gl1_range as "Gas Lift 2 period",
-                                w_gl2 as "Gas Lift 1",
-                                w_gl2_range as "Gas Lift 1 period"
+                                w_gl1 as "Lift1",
+                                w_gl1_range as "Lift1 duration",
+                                w_gl2 as "Lift2",
+                                w_gl2_range as "Lift2 duration"
                 FROM getWellDetails({asset_id})""")
 
                 rs = cur.fetchall()
@@ -96,14 +91,8 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
 
     return df.to_dict(orient='records')
 
-@router.get("/{asset_id}/production_data")
+"""@router.get("/{asset_id}/production_data")
 async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
-    """Retrieves the production variables recorded in quorum database for a well
-
-    asset_id: Unique identifier of the asset
-    st_dt: Start date of the range
-    et_dt: End date of the range
-    """
 
     asset_id_sub = asset_id.replace('.01', '01')
 
@@ -138,7 +127,7 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
         'q_wltype_encoded': 'wltype_encoded'
     }, inplace=True)
 
-    return df.to_dict(orient='records')
+    return df.to_dict(orient='records')"""
 
 @router.post("/")
 async def getWells(item: WhatIfRequest):

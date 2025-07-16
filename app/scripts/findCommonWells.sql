@@ -20,19 +20,26 @@ CREATE TABLE maps.wells_merged_by_name AS (
 	w3.latitude,
 	w3.foreman,
 	w3.wl_type2 AS gl1,
-	CASE 
-		WHEN wl2_begindt = 'NULL' THEN NULL
-		ELSE 
-			date_part('year', wl2_begindt::date)::text || '-' || date_part('month', wl2_begindt::date)::text || '-' || date_part('day', wl2_begindt::date)::text || ' to ' ||
-			date_part('year', wl2_enddt::date)::text || '-' || date_part('month', wl2_enddt::date)::text || '-' || date_part('day', wl2_enddt::date)::text
-	END AS "GL1 Range",
+	wl2_begindt,
+	wl2_enddt,
+	case 
+		WHEN w3.wl_type2='NULL' THEN '' 
+		WHEN wl2_begindt='NULL' and wl2_enddt='NULL' THEN ''
+		when wl2_begindt='NULL' then 'TO ' || to_char(to_date(wl2_enddt, 'YYYY-MM-DD'), 'YYYY-MM-DD') 
+		WHEN wl2_enddt='NULL' THEN 'FROM ' || to_char(to_date(wl2_begindt, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+		ELSE to_char(to_date(wl2_begindt, 'YYYY-MM-DD'), 'YYYY-MM-DD') || ' TO ' || to_char(to_date(wl2_enddt, 'YYYY-MM-DD'), 'YYYY-MM-DD') 
+	END as "GL1 Range",
 	w3.wl_type1 AS gl2,
-	CASE
-		WHEN wl1_begindt = 'NULL' THEN NULL
-		ELSE
-        		date_part('year', wl1_begindt::date)::text || '-' || date_part('month', wl1_begindt::date)::text || '-' || date_part('day', wl1_begindt::date)::text || ' to ' ||
-        		date_part('year', wl1_enddt::date)::text || '-' || date_part('month', wl1_enddt::date)::text || '-' || date_part('day', wl1_enddt::date)::text
-	END AS "GL2 Range",
+	wl1_begindt,
+	wl1_enddt,
+	case
+                WHEN w3.wl_type1='NULL' THEN ''
+                WHEN wl1_begindt='NULL' and wl1_enddt='NULL' THEN ''
+                when wl1_begindt='NULL' then 'TO ' || to_char(to_date(wl1_enddt, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+                WHEN wl1_enddt='NULL' THEN 'FROM ' || to_char(to_date(wl1_begindt, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+		WHEN to_char(wl1_enddt::date, 'YYYY-MM-DD')='9000-12-31' THEN to_char(to_date(wl1_begindt, 'YYYY-MM-DD'), 'YYYY-MM-DD') || ' TO ' || 'current'
+                ELSE to_char(to_date(wl1_begindt, 'YYYY-MM-DD'), 'YYYY-MM-DD') || ' TO ' || to_char(to_date(wl1_enddt, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+        END as "GL2 Range",
 	(regexp_match(
                 regexp_replace(
                 regexp_replace(
