@@ -55,7 +55,8 @@ async def read_assets(asset_id: str, request: Request = None):
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
             try:
-                cur.execute(f"""SELECT 
+                cur.execute(f"""SELECT
+                                w_description as "Well Name"
                                 w_county as "County",
                                 w_state as "State",
                                 w_pv_wc_id as "RefID",
