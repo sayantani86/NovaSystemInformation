@@ -20,11 +20,7 @@ CREATE OR REPLACE FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num i
         q_allocatedproductionoilvolume_lag1 numeric(13, 2),
         q_allocatedproductionoilvolume_lag2 numeric(13, 2),
         q_allocatedproductionoilvolume_lag3 numeric(13, 2),
-        q_wltype_encoded float,
-	hist_min_date date,
-	hist_max_date date,
-	cal_min_date date,
-	cal_max_date date
+        q_wltype_encoded float
 ) AS
 $$
 DECLARE
@@ -69,11 +65,7 @@ BEGIN
 		allocatedproductionoilvolume_lag1,
 		allocatedproductionoilvolume_lag2,
 		allocatedproductionoilvolume_lag3,
-		wltype_encoded,
-		c.min_entry_date,
-		c.max_entry_date, 
-		d.calendar_min, 
-		d.calendar_max
+		wltype_encoded
        	FROM 
 		quorum_range_partitioned_jul10 prod
 	LEFT JOIN 

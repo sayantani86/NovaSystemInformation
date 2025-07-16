@@ -16,18 +16,13 @@ CREATE OR REPLACE FUNCTION getWellDetails(refid numeric)
 	w_gl1 varchar,
 	w_gl1_range varchar,
 	w_gl2 varchar,
-	w_gl2_range varchar,
-	min_entry_date date,
-	max_entry_date date,
-	calendar_min date,
-	calendar_max date
+	w_gl2_range varchar
 ) AS 
 $$
 BEGIN
 	RAISE NOTICE 'RefId = %', refid;
 
 	RETURN QUERY 
-		SELECT b.*, c.min_entry_date,c.max_entry_date, d.calendar_min, d.calendar_max FROM (
 			SELECT description,
 				county, 
 				state, 
@@ -52,12 +47,7 @@ BEGIN
 					SELECT * FROM maps.others
 				) a
 			WHERE 
-				a.pv_wc_id::numeric = getWellDetails.refid::numeric
-		) b LEFT JOIN quorum_range_partitioned_jul10_hist_min_max_date c 
-		ON 
-			b.pv_wc_id::numeric = c.refid_out::numeric
-		LEFT JOIN calendar_minmax d
-			ON b.pv_wc_id::numeric = d.refid::numeric;	
+				a.pv_wc_id::numeric = getWellDetails.refid::numeric;
 
 END;
 $$ LANGUAGE plpgsql;

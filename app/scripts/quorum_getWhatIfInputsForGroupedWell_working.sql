@@ -20,11 +20,7 @@ CREATE OR REPLACE FUNCTION getWhatIfInputsForGroupedWells() RETURNS TABLE (
         q_allocatedproductionoilvolume_lag1 numeric(13, 2),
         q_allocatedproductionoilvolume_lag2 numeric(13, 2),
         q_allocatedproductionoilvolume_lag3 numeric(13, 2),
-        q_wltype_encoded float,
-	hist_min_date date,
-        hist_max_date date,
-        cal_min_date date,
-        cal_max_date date
+        q_wltype_encoded float
 ) AS
 $$
 DECLARE
