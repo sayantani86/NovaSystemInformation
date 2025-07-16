@@ -92,7 +92,7 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
 
     return df.to_dict(orient='records')
 
-"""@router.get("/{asset_id}/production_data")
+@router.get("/{asset_id}/production_data")
 async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
 
     asset_id_sub = asset_id.replace('.01', '01')
@@ -128,7 +128,7 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
         'q_wltype_encoded': 'wltype_encoded'
     }, inplace=True)
 
-    return df.to_dict(orient='records')"""
+    return df.to_dict(orient='records')
 
 @router.post("/")
 async def getWells(item: WhatIfRequest):
