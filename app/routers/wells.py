@@ -102,7 +102,7 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
-                cur.execute(f"SELECT * FROM getRangedDataFromQuorumByWell('{asset_id}', {asset_id_sub}, '{st_dt}', '{et_dt}')")
+                cur.execute(f"SELECT * FROM getRangedDataFromQuorumByWell('{asset_id}', '{st_dt}', '{et_dt}')")
                 rs = cur.fetchall()
                 conn.commit()
 
