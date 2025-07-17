@@ -12,15 +12,10 @@ CREATE OR REPLACE FUNCTION getRangedDataFromQuorumByWell(refid text, refid_num i
 	q_allocatedgasinjectionvolume numeric(13,2),
 	q_choke float,
 	q_welllift_flag boolean,
-	q_wl_type varchar,
-	q_shutin_flag1 integer,
+	q_wltype_encoded float,
 	q_shutin_flag3 float,
-	q_rampup_flag boolean,
-	q_allocatedproductionoilvolume numeric(13, 2),
-        q_allocatedproductionoilvolume_lag1 numeric(13, 2),
-        q_allocatedproductionoilvolume_lag2 numeric(13, 2),
-        q_allocatedproductionoilvolume_lag3 numeric(13, 2),
-        q_wltype_encoded float
+	q_allocatedproductionoilvolume_lag1 numeric(13, 2),
+	q_allocatedproductionoilvolume numeric(13, 2)
 ) AS
 $$
 DECLARE
@@ -57,17 +52,12 @@ BEGIN
 		allocatedgasinjectionvolume,
 		choke,
 		welllift_flag::boolean,
-		wl_type,
-		shutin_flag1,
+		wltype_encoded,
 		shutin_flag3,
-		rampup_flag::boolean,
 		allocatedproductionoilvolume,
-		allocatedproductionoilvolume_lag1,
-		allocatedproductionoilvolume_lag2,
-		allocatedproductionoilvolume_lag3,
-		wltype_encoded
+		allocatedproductionoilvolume_lag1
        	FROM 
-		quorum_range_partitioned_jul10 prod
+		quorum_range_partitioned_jul15 prod
 	LEFT JOIN 
 		quorum_range_partitioned_jul10_hist_min_max_date c
         ON

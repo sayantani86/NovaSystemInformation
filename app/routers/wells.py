@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import subprocess
 import psycopg
+import time
 from psycopg.rows import dict_row
 from typing import Annotated
 from fastapi import APIRouter, Query, HTTPException, Request
@@ -79,7 +80,7 @@ async def read_assets(asset_id: str, request: Request = None):
     return rs
 
 @router.get("/{asset_id}/quorum")
-def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
+def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)], request: Request = None):
     '''Get data between start_date and end_date'''
 
     p1 = subprocess.run(['bash', os.path.join(os.getenv("SCRIPTS_DIR"), "quorum_getWell.sh"), "dba_access", "novadb", asset_id, st_dt, et_dt], capture_output=True)
@@ -93,7 +94,9 @@ def get_quorum_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], 
     return df.to_dict(orient='records')
 
 @router.get("/{asset_id}/production_data")
-async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)]):
+async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_length=10)], et_dt: Annotated[str, Query(max_length=10)], request: Request = None):
+
+    token = await verify_jwt_from_request(request)
 
     asset_id_sub = asset_id.replace('.01', '01')
 
@@ -117,37 +120,36 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
         'q_allocatedgasinjectionvolume': 'allocatedgasinjectionvolume',
         'q_choke': 'choke',
         'q_welllift_flag': 'welllift_flag',
-        'q_wl_type': 'wl_type',
-        'q_shutin_flag1': 'shutin_flag1',
         'q_shutin_flag3': 'shutin_flag3',
-        'q_rampup_flag': 'rampup_flag',
         'q_allocatedproductionoilvolume': 'allocatedproductionoilvolume',
         'q_allocatedproductionoilvolume_lag1': 'allocatedproductionoilvolume_lag1',
-        'q_allocatedproductionoilvolume_lag2': 'allocatedproductionoilvolume_lag2',
-        'q_allocatedproductionoilvolume_lag3': 'allocatedproductionoilvolume_lag3',
         'q_wltype_encoded': 'wltype_encoded'
     }, inplace=True)
 
     return df.to_dict(orient='records')
 
 @router.post("/")
-async def getWells(item: WhatIfRequest):
+async def getWells(item: WhatIfRequest, request: Request = None):
     """Retrieves the production variables recorded in Quorum database for a group of wells
 
     item: An object of a list of RefId and a date range for the group
     """
 
+    token = await verify_jwt_from_request(request)
+
     actionableInputs = tuple(zip(item.productionWellList, [item.startDate] * len(item.productionWellList), [item.endDate] * len(item.productionWellList)))
 
-    #wellNames = "'{" + ",".join(map(lambda x: str(x), item.productionWellList)) + "}'"
+    req = "'{" + "\"productionWellList\":" + "[" + ",".join(map(str, item.productionWellList)) + "]" + ", \"startDate\": \"" + item.startDate + "\", \"endDate\": \"" + item.endDate  + "\"}'" 
+
+    ts = time.time()
 
     with psycopg.connect("dbname=novadb user=dba_access host=172.30.2.104 password=avon123", row_factory=dict_row) as conn:
         with conn.cursor() as cur:
-                cur.execute("DROP TABLE IF EXISTS quorum_whatif.whatif_inputs;")
+                #cur.execute("DROP TABLE IF EXISTS quorum_whatif.whatif_inputs;")
                 
-                cur.execute("CREATE TABLE quorum_whatif.whatif_inputs(refid float, start_date varchar, end_date varchar);")
+                #cur.execute("CREATE TABLE quorum_whatif.whatif_inputs(refid float, start_date varchar, end_date varchar);")
 
-                cur.executemany(f"INSERT INTO quorum_whatif.whatif_inputs(refid, start_date, end_date) values (%s, %s, %s)", actionableInputs)
+                #cur.executemany(f"INSERT INTO quorum_whatif.whatif_inputs(refid, start_date, end_date) values (%s, %s, %s)", actionableInputs)
 
                 cur.execute(f"""SELECT
                                 q_wellname as wellname,
@@ -161,33 +163,34 @@ async def getWells(item: WhatIfRequest):
                                 q_allocatedgasinjectionvolume as allocatedgasinjectionvolume,
                                 q_choke as choke,
                                 q_welllift_flag as welllift_flag,
-                                q_wl_type as wl_type,
-                                q_shutin_flag1 as shutin_flag1,
                                 q_shutin_flag3 as shutin_flag3,
-                                q_rampup_flag as rampup_flag,
                                 q_allocatedproductionoilvolume as allocatedproductionoilvolume,
                                 q_allocatedproductionoilvolume_lag1 as allocatedproductionoilvolume_lag1,
-                                q_allocatedproductionoilvolume_lag2 as allocatedproductionoilvolume_lag2,
-                                q_allocatedproductionoilvolume_lag3 as allocatedproductionoilvolume_lag3,
                                 q_wltype_encoded as wltype_encoded
                             FROM 
-                                getWhatIfInputsForGroupedWells();""")
+                                getWhatIfInputsForGroupedWells_1({req});""")
+
+                
 
                 rs = cur.fetchall()
                 
                 conn.commit()
 
+    print(f"{time.time() - ts}")
+
     return rs
 
 @router.post("/nearby_components")
 async def get_components_within_two_miles(
-        item: NearbyComponentRequest
+        item: NearbyComponentRequest, request: Request = None
     ):
     """Get nearby components within 2 miles radius of a well.The results are precomputed and loaded when queried
 
     asset_id: Unique identifier of the asset
     """
-   
+  
+    token = await verify_jwt_from_request(request)
+
     wellNames = "'{" + ",".join(map(lambda x: str(x), item.productionWellList)) + "}'"
 
     req = "'{" + f'"productionWellList": {item.productionWellList}' + "}'::jsonb"
@@ -205,8 +208,11 @@ async def get_components_within_two_miles(
 
 @router.post("/multiwelldates")
 async def get_common_period(
-        item: NearbyComponentRequest
+        item: NearbyComponentRequest, request: Request = None
     ):
+
+    token = await verify_jwt_from_request(request)
+
     req = "'{" + f'"productionWellList": {item.productionWellList}' + "}'::jsonb"
 
     min_entry_date = None
