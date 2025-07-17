@@ -52,7 +52,7 @@ BEGIN
 		allocatedgasinjectionvolume,
 		choke,
 		welllift_flag::boolean,
-		wl_type_encoded,
+		wltype_encoded,
 		shutin_flag3,
 		allocatedproductionoilvolume,
 		allocatedproductionoilvolume_lag1
