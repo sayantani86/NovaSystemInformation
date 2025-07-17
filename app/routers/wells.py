@@ -117,14 +117,9 @@ async def get_production_data(asset_id: str, st_dt: Annotated[str, Query(max_len
         'q_allocatedgasinjectionvolume': 'allocatedgasinjectionvolume',
         'q_choke': 'choke',
         'q_welllift_flag': 'welllift_flag',
-        'q_wl_type': 'wl_type',
-        'q_shutin_flag1': 'shutin_flag1',
         'q_shutin_flag3': 'shutin_flag3',
-        'q_rampup_flag': 'rampup_flag',
         'q_allocatedproductionoilvolume': 'allocatedproductionoilvolume',
         'q_allocatedproductionoilvolume_lag1': 'allocatedproductionoilvolume_lag1',
-        'q_allocatedproductionoilvolume_lag2': 'allocatedproductionoilvolume_lag2',
-        'q_allocatedproductionoilvolume_lag3': 'allocatedproductionoilvolume_lag3',
         'q_wltype_encoded': 'wltype_encoded'
     }, inplace=True)
 
@@ -161,14 +156,9 @@ async def getWells(item: WhatIfRequest):
                                 q_allocatedgasinjectionvolume as allocatedgasinjectionvolume,
                                 q_choke as choke,
                                 q_welllift_flag as welllift_flag,
-                                q_wl_type as wl_type,
-                                q_shutin_flag1 as shutin_flag1,
                                 q_shutin_flag3 as shutin_flag3,
-                                q_rampup_flag as rampup_flag,
                                 q_allocatedproductionoilvolume as allocatedproductionoilvolume,
                                 q_allocatedproductionoilvolume_lag1 as allocatedproductionoilvolume_lag1,
-                                q_allocatedproductionoilvolume_lag2 as allocatedproductionoilvolume_lag2,
-                                q_allocatedproductionoilvolume_lag3 as allocatedproductionoilvolume_lag3,
                                 q_wltype_encoded as wltype_encoded
                             FROM 
                                 getWhatIfInputsForGroupedWells();""")
