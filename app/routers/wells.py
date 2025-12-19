@@ -8,10 +8,6 @@ import numpy as np
 router = APIRouter()
 @router.get("/wells")
 async def get_well_cards():
-    """
-    Fetch well card data for a date range.
-    Dates should be in ISO format: YYYY-MM-DD
-    """
 
     data=[
             {

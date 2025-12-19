@@ -8,12 +8,7 @@ import numpy as np
 router = APIRouter()
 @router.get("/compressor_details")
 def get_compressor_details():
-    """
-    Fetch monthly oil production data for a date range.
-    Dates should be in ISO format: YYYY-MM-DD
-    """
     try:
-        # Load CSV
         data = [
                     {
                     "date": "09/01/2025",
