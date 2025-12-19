@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.ipynb
+*.ipynb_checkpoints
+build/
+*.csv
+*.log
+.env
+.venv
+.DS_Store
+data
+geojson
